@@ -6,10 +6,9 @@ import { OfflineBanner } from '../../src/components/OfflineBanner';
 import { StoryListSkeleton } from '../../src/components/Skeleton';
 import { StoryList } from '../../src/components/StoryList';
 import { useStories } from '../../src/hooks/useStories';
+import { strings } from '../../src/i18n/strings';
 import { toSummary } from '../../src/store/bookmarks';
 import { useTheme } from '../../src/theme';
-
-const LABEL: Record<FeedKind, string> = { top: 'Top', new: 'New', best: 'Best', ask: 'Ask', show: 'Show' };
 
 export default function StoriesScreen() {
   const [feed, setFeed] = useState<FeedKind>('top');
@@ -41,7 +40,9 @@ export default function StoriesScreen() {
                   backgroundColor: active ? colors.accent : colors.background,
                 }}
               >
-                <Text style={{ color: active ? '#fff' : colors.text, fontWeight: '600' }}>{LABEL[f]}</Text>
+                <Text style={{ color: active ? '#fff' : colors.text, fontWeight: '600' }}>
+                  {strings.feeds[f]}
+                </Text>
               </Pressable>
             );
           })}
@@ -61,7 +62,7 @@ export default function StoriesScreen() {
             if (q.hasNextPage && !q.isFetchingNextPage) void q.fetchNextPage();
           }}
           loadingMore={q.isFetchingNextPage}
-          emptyTitle="No stories"
+          emptyTitle={strings.list.noStories}
         />
       )}
     </View>

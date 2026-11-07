@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import type { HNItem } from '../api';
 import { htmlToText } from '../lib/comments';
+import { strings } from '../i18n/strings';
 import { timeAgo } from '../lib/format';
 import { useTheme } from '../theme';
 
@@ -31,10 +32,10 @@ function CommentRowBase({ id, depth, item, loading, replyCount, expanded, onTogg
     return (
       <View style={[{ padding: 12 }, indent]}>
         {loading ? (
-          <Text style={{ color: colors.textMuted }}>Loading comment…</Text>
+          <Text style={{ color: colors.textMuted }}>{strings.comment.loading}</Text>
         ) : (
           <Pressable onPress={onRetry} accessibilityRole="button">
-            <Text style={{ color: colors.danger }}>Failed to load. Tap to retry.</Text>
+            <Text style={{ color: colors.danger }}>{strings.comment.failed}</Text>
           </Pressable>
         )}
       </View>
@@ -42,11 +43,7 @@ function CommentRowBase({ id, depth, item, loading, replyCount, expanded, onTogg
   }
 
   const hint =
-    replyCount === 0
-      ? ''
-      : expanded
-        ? 'Tap to collapse'
-        : `${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}, tap to expand`;
+    replyCount === 0 ? '' : expanded ? strings.comment.collapse : strings.comment.expand(replyCount);
   return (
     <Pressable
       testID={`comment-${id}`}
@@ -56,7 +53,7 @@ function CommentRowBase({ id, depth, item, loading, replyCount, expanded, onTogg
       style={[{ padding: 12, backgroundColor: colors.surface }, indent]}
     >
       <Text style={{ color: colors.textMuted, fontSize: 12 }}>
-        {item.by ?? 'unknown'} · {timeAgo(item.time)}
+        {item.by ?? strings.story.unknownAuthor} · {timeAgo(item.time)}
       </Text>
       <Text style={{ color: colors.text, marginTop: 4, lineHeight: 20 }}>{htmlToText(item.text)}</Text>
       {hint ? <Text style={{ color: colors.accent, fontSize: 12, marginTop: 6 }}>{hint}</Text> : null}

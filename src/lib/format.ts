@@ -1,18 +1,20 @@
+import { strings } from '../i18n/strings';
+
 export function timeAgo(unixSeconds: number | undefined, nowMs: number = Date.now()): string {
   if (!unixSeconds) return '';
   const diff = Math.max(0, Math.floor(nowMs / 1000 - unixSeconds));
-  if (diff < 60) return 'just now';
+  if (diff < 60) return strings.time.justNow;
   const units: [number, string][] = [
-    [31_536_000, 'y'],
-    [2_592_000, 'mo'],
-    [86_400, 'd'],
-    [3600, 'h'],
-    [60, 'm'],
+    [31_536_000, strings.time.units.year],
+    [2_592_000, strings.time.units.month],
+    [86_400, strings.time.units.day],
+    [3600, strings.time.units.hour],
+    [60, strings.time.units.minute],
   ];
   for (const [secs, label] of units) {
-    if (diff >= secs) return `${Math.floor(diff / secs)}${label} ago`;
+    if (diff >= secs) return strings.time.ago(Math.floor(diff / secs), label);
   }
-  return 'just now';
+  return strings.time.justNow;
 }
 
 export function hostname(url: string | undefined): string {

@@ -1,5 +1,6 @@
 import { Text, View } from 'react-native';
 import { useIsOnline } from '../hooks/useOnline';
+import { strings } from '../i18n/strings';
 import { useTheme } from '../theme';
 
 export function OfflineBanner() {
@@ -8,7 +9,7 @@ export function OfflineBanner() {
   if (online) return null;
   return (
     <View testID="offline-banner" style={{ backgroundColor: colors.banner, padding: 8 }}>
-      <Text style={{ color: '#fff', textAlign: 'center' }}>You are offline. Showing saved data.</Text>
+      <Text style={{ color: '#fff', textAlign: 'center' }}>{strings.offline}</Text>
     </View>
   );
 }

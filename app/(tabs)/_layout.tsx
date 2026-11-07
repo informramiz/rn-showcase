@@ -1,14 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
+import { strings } from '../../src/i18n/strings';
 import { useTheme } from '../../src/theme';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
 const TABS: { name: string; title: string; icon: IconName }[] = [
-  { name: 'index', title: 'Stories', icon: 'newspaper-outline' },
-  { name: 'bookmarks', title: 'Saved', icon: 'bookmark-outline' },
-  { name: 'history', title: 'History', icon: 'time-outline' },
-  { name: 'settings', title: 'Settings', icon: 'settings-outline' },
+  { name: 'index', title: strings.tabs.stories, icon: 'newspaper-outline' },
+  { name: 'bookmarks', title: strings.tabs.saved, icon: 'bookmark-outline' },
+  { name: 'history', title: strings.tabs.history, icon: 'time-outline' },
+  { name: 'settings', title: strings.tabs.settings, icon: 'settings-outline' },
 ];
 
 export default function TabsLayout() {

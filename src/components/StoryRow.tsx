@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { hostname, timeAgo } from '../lib/format';
+import { strings } from '../i18n/strings';
 import { useIsRead } from '../store/history';
 import { useTheme } from '../theme';
 import type { StorySummary } from '../api';
@@ -15,10 +16,10 @@ function StoryRowBase({ story, index, onPress }: Props) {
   const { colors } = useTheme();
   const read = useIsRead(story.id);
   const meta = [
-    story.score != null ? `${story.score} pts` : null,
+    story.score != null ? strings.story.points(story.score) : null,
     story.by,
     timeAgo(story.time),
-    story.descendants != null ? `${story.descendants} comments` : null,
+    story.descendants != null ? strings.story.comments(story.descendants) : null,
   ]
     .filter(Boolean)
     .join(' · ');

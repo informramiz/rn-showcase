@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { CACHE_MAX_AGE_MS, createQueryClient, persister } from '../src/hooks/queryClient';
 import { useOnlineManagerSync } from '../src/hooks/useOnline';
+import { strings } from '../src/i18n/strings';
 import { useTheme } from '../src/theme';
 
 export default function RootLayout() {
@@ -22,7 +23,10 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="story/[id]" options={{ title: 'Story', headerBackTitle: 'Stories' }} />
+        <Stack.Screen
+          name="story/[id]"
+          options={{ title: strings.story.screenTitle, headerBackTitle: strings.story.backTitle }}
+        />
       </Stack>
     </PersistQueryClientProvider>
   );

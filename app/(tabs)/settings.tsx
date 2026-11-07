@@ -2,16 +2,13 @@ import { useQueryClient } from '@tanstack/react-query';
 import Constants from 'expo-constants';
 import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { clearQueryCache } from '../../src/hooks/queryClient';
+import { strings } from '../../src/i18n/strings';
 import { useBookmarks } from '../../src/store/bookmarks';
 import { useHistory } from '../../src/store/history';
 import { useSettings, type ThemeMode } from '../../src/store/settings';
 import { useTheme } from '../../src/theme';
 
-const MODES: { value: ThemeMode; label: string }[] = [
-  { value: 'system', label: 'System' },
-  { value: 'light', label: 'Light' },
-  { value: 'dark', label: 'Dark' },
-];
+const MODES: readonly ThemeMode[] = ['system', 'light', 'dark'];
 
 export default function SettingsScreen() {
   const { colors } = useTheme();
@@ -24,7 +21,7 @@ export default function SettingsScreen() {
   const onClearCache = async () => {
     await clearQueryCache(client);
     clearHistory();
-    Alert.alert('Cache cleared', 'Cached stories and reading history were removed. Bookmarks are kept.');
+    Alert.alert(strings.settings.cacheCleared, strings.settings.cacheClearedBody);
   };
 
   const section = {
@@ -44,17 +41,17 @@ export default function SettingsScreen() {
   return (
     <ScrollView contentContainerStyle={{ padding: 16, gap: 24 }}>
       <View>
-        <Text style={section}>Theme</Text>
+        <Text style={section}>{strings.settings.theme}</Text>
         <View style={{ flexDirection: 'row', gap: 8 }}>
           {MODES.map((m) => {
-            const active = m.value === mode;
+            const active = m === mode;
             return (
               <Pressable
-                key={m.value}
-                testID={`theme-${m.value}`}
+                key={m}
+                testID={`theme-${m}`}
                 accessibilityRole="radio"
                 accessibilityState={{ selected: active }}
-                onPress={() => setMode(m.value)}
+                onPress={() => setMode(m)}
                 style={{
                   flex: 1,
                   padding: 12,
@@ -65,7 +62,9 @@ export default function SettingsScreen() {
                   borderColor: colors.border,
                 }}
               >
-                <Text style={{ color: active ? '#fff' : colors.text, fontWeight: '600' }}>{m.label}</Text>
+                <Text style={{ color: active ? '#fff' : colors.text, fontWeight: '600' }}>
+                  {strings.settings.themeModes[m]}
+                </Text>
               </Pressable>
             );
           })}
@@ -73,21 +72,21 @@ export default function SettingsScreen() {
       </View>
 
       <View style={{ gap: 8 }}>
-        <Text style={section}>Data</Text>
+        <Text style={section}>{strings.settings.data}</Text>
         <Pressable testID="clear-cache" accessibilityRole="button" onPress={onClearCache} style={button}>
-          <Text style={{ color: colors.text }}>Clear cache and history</Text>
+          <Text style={{ color: colors.text }}>{strings.settings.clearCache}</Text>
         </Pressable>
         <Pressable accessibilityRole="button" onPress={clearBookmarks} style={button}>
-          <Text style={{ color: colors.danger }}>Remove all bookmarks</Text>
+          <Text style={{ color: colors.danger }}>{strings.settings.removeBookmarks}</Text>
         </Pressable>
       </View>
 
       <View style={{ gap: 8 }}>
-        <Text style={section}>About</Text>
-        <Text style={{ color: colors.text }}>HN Reader {Constants.expoConfig?.version ?? ''}</Text>
-        <Text style={{ color: colors.textMuted }}>
-          Data from the public Hacker News API. Not affiliated with Y Combinator.
+        <Text style={section}>{strings.settings.about}</Text>
+        <Text style={{ color: colors.text }}>
+          {strings.settings.appName} {Constants.expoConfig?.version ?? ''}
         </Text>
+        <Text style={{ color: colors.textMuted }}>{strings.settings.disclaimer}</Text>
       </View>
     </ScrollView>
   );

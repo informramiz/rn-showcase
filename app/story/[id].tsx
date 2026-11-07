@@ -8,6 +8,7 @@ import { StoryRowSkeleton } from '../../src/components/Skeleton';
 import { useItem } from '../../src/hooks/useItem';
 import { htmlToText } from '../../src/lib/comments';
 import { hostname, timeAgo } from '../../src/lib/format';
+import { strings } from '../../src/i18n/strings';
 import { toSummary, useBookmarks } from '../../src/store/bookmarks';
 import { useHistory } from '../../src/store/history';
 import { useTheme } from '../../src/theme';
@@ -32,13 +33,14 @@ export default function StoryDetailScreen() {
   const host = hostname(url);
   return (
     <ScrollView testID="story-detail" contentContainerStyle={{ paddingBottom: 48 }}>
-      <Stack.Screen options={{ title: host || 'Story' }} />
+      <Stack.Screen options={{ title: host || strings.story.screenTitle }} />
       <View style={{ padding: 16, gap: 8, backgroundColor: colors.surface }}>
         <Text style={{ color: colors.text, fontSize: 20, fontWeight: '700', lineHeight: 26 }}>
           {story.title}
         </Text>
         <Text style={{ color: colors.textMuted, fontSize: 12 }}>
-          {story.score ?? 0} pts · {story.by} · {timeAgo(story.time)} · {story.descendants ?? 0} comments
+          {strings.story.points(story.score ?? 0)} · {story.by} · {timeAgo(story.time)} ·{' '}
+          {strings.story.comments(story.descendants ?? 0)}
         </Text>
         {story.text ? (
           <Text style={{ color: colors.text, lineHeight: 21 }}>{htmlToText(story.text)}</Text>
@@ -57,7 +59,7 @@ export default function StoryDetailScreen() {
                 alignItems: 'center',
               }}
             >
-              <Text style={{ color: '#fff', fontWeight: '600' }}>Open link</Text>
+              <Text style={{ color: '#fff', fontWeight: '600' }}>{strings.story.openLink}</Text>
             </Pressable>
           ) : null}
           <Pressable
@@ -74,14 +76,16 @@ export default function StoryDetailScreen() {
               alignItems: 'center',
             }}
           >
-            <Text style={{ color: colors.accent, fontWeight: '600' }}>{bookmarked ? 'Saved' : 'Save'}</Text>
+            <Text style={{ color: colors.accent, fontWeight: '600' }}>
+              {bookmarked ? strings.story.saved : strings.story.save}
+            </Text>
           </Pressable>
         </View>
       </View>
       {story.kids?.length ? (
         <CommentThread rootIds={story.kids} />
       ) : (
-        <Text style={{ color: colors.textMuted, padding: 16 }}>No comments yet.</Text>
+        <Text style={{ color: colors.textMuted, padding: 16 }}>{strings.story.noComments}</Text>
       )}
     </ScrollView>
   );

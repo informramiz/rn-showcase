@@ -16,18 +16,13 @@ export function isApiError(e: unknown): e is ApiError {
   return e instanceof ApiError;
 }
 
-export function describeError(e: unknown): string {
-  if (!isApiError(e)) return 'Something went wrong.';
-  switch (e.kind) {
-    case 'network':
-      return 'No connection. Check your network and try again.';
-    case 'timeout':
-      return 'The request timed out. Try again.';
-    case 'http':
-      return `The server returned an error (${e.status ?? 'unknown'}).`;
-    case 'not_found':
-      return 'This item no longer exists.';
-    case 'parse':
-      return 'The server sent an unexpected response.';
-  }
+export interface ErrorInfo {
+  kind: ApiErrorKind | 'unknown';
+  status?: number;
+}
+
+/** Classify any thrown value. The UI decides how to word each kind. */
+export function describeError(e: unknown): ErrorInfo {
+  if (!isApiError(e)) return { kind: 'unknown' };
+  return { kind: e.kind, status: e.status };
 }

@@ -1,13 +1,19 @@
 import { Pressable, Text, View } from 'react-native';
 import { describeError } from '../api';
+import { strings } from '../i18n/strings';
 import { useTheme } from '../theme';
+
+function errorMessage(error: unknown): string {
+  const { kind, status } = describeError(error);
+  return kind === 'http' ? strings.error.http(status) : strings.error[kind];
+}
 
 export function ErrorState({ error, onRetry }: { error: unknown; onRetry: () => void }) {
   const { colors } = useTheme();
   return (
     <View testID="error-state" style={{ padding: 32, alignItems: 'center', gap: 12 }}>
-      <Text style={{ color: colors.text, fontSize: 18, fontWeight: '600' }}>Could not load</Text>
-      <Text style={{ color: colors.textMuted, textAlign: 'center' }}>{describeError(error)}</Text>
+      <Text style={{ color: colors.text, fontSize: 18, fontWeight: '600' }}>{strings.error.title}</Text>
+      <Text style={{ color: colors.textMuted, textAlign: 'center' }}>{errorMessage(error)}</Text>
       <Pressable
         testID="retry-button"
         accessibilityRole="button"
@@ -19,7 +25,7 @@ export function ErrorState({ error, onRetry }: { error: unknown; onRetry: () => 
           borderRadius: 8,
         }}
       >
-        <Text style={{ color: '#fff', fontWeight: '600' }}>Retry</Text>
+        <Text style={{ color: '#fff', fontWeight: '600' }}>{strings.error.retry}</Text>
       </Pressable>
     </View>
   );

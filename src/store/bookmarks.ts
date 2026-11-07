@@ -1,12 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { HNItem, StorySummary } from '../api';
+import { strings } from '../i18n/strings';
 import { zustandStorage } from '../lib/storage';
 
 export function toSummary(item: HNItem): StorySummary {
   return {
     id: item.id,
-    title: item.title ?? '(untitled)',
+    title: item.title ?? strings.story.untitled,
     url: item.url,
     by: item.by,
     time: item.time,

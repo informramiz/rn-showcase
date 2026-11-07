@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { View } from 'react-native';
 import { StoryList } from '../../src/components/StoryList';
+import { strings } from '../../src/i18n/strings';
 import { useHistory } from '../../src/store/history';
 
 export default function HistoryScreen() {
@@ -11,8 +12,8 @@ export default function HistoryScreen() {
       <StoryList
         testID="history-list"
         stories={stories}
-        emptyTitle="Nothing read yet"
-        emptyHint="Stories you open show up here."
+        emptyTitle={strings.list.nothingRead}
+        emptyHint={strings.list.nothingReadHint}
       />
     </View>
   );

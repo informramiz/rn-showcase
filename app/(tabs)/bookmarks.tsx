@@ -1,5 +1,6 @@
 import { View } from 'react-native';
 import { StoryList } from '../../src/components/StoryList';
+import { strings } from '../../src/i18n/strings';
 import { useBookmarks } from '../../src/store/bookmarks';
 
 export default function BookmarksScreen() {
@@ -9,8 +10,8 @@ export default function BookmarksScreen() {
       <StoryList
         testID="bookmarks-list"
         stories={items}
-        emptyTitle="No bookmarks yet"
-        emptyHint="Open a story and tap Save. Saved stories stay available offline."
+        emptyTitle={strings.list.noBookmarks}
+        emptyHint={strings.list.noBookmarksHint}
       />
     </View>
   );
