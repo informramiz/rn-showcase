@@ -1,0 +1,29 @@
+# Smoke flow for a dev client or release build with the app installed.
+appId: com.codebyramiz.hnreader
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: story-item-0
+    timeout: 30000
+- scroll
+- scroll
+- scrollUntilVisible:
+    element:
+      id: story-item-0
+    direction: UP
+- tapOn:
+    id: story-item-0
+- extendedWaitUntil:
+    visible:
+      id: bookmark-button
+    timeout: 20000
+- tapOn:
+    id: bookmark-button
+- assertVisible: Saved
+- back
+- tapOn:
+    id: tab-bookmarks
+- assertVisible:
+    id: story-item-0

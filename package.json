@@ -51,7 +51,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "test": "jest",
+    "test": "jest --watchman=false",
     "doctor": "expo-doctor",
     "export": "expo export"
   }

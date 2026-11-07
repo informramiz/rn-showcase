@@ -31,7 +31,7 @@ export default function TabsLayout() {
           options={{
             title: t.title,
             tabBarButtonTestID: `tab-${t.name}`,
-            tabBarIcon: ({ color, size }) => <Ionicons name={t.icon} color={color} size={size} />,
+            tabBarIcon: ({ color, size }) => <Ionicons name={t.icon} color={color as string} size={size} />,
           }}
         />
       ))}
