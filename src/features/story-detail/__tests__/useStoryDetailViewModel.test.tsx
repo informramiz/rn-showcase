@@ -58,6 +58,28 @@ describe('useStoryDetailViewModel', () => {
     expect(WebBrowser.openBrowserAsync).toHaveBeenCalledWith('https://x.dev/a');
   });
 
+  it('refuses to open non-http(s) links', async () => {
+    jest.mocked(WebBrowser.openBrowserAsync).mockClear();
+    mockFetch.mockReturnValue(ok({ ...story, url: 'javascript:alert(1)' }));
+    const { result } = await setup();
+    await waitFor(() => {
+      expect(result.current.state.story).toBeDefined();
+    });
+    expect(result.current.state.canOpenLink).toBe(false);
+    await act(() => {
+      result.current.actions.openLink();
+    });
+    expect(WebBrowser.openBrowserAsync).not.toHaveBeenCalled();
+  });
+
+  it('allows https links', async () => {
+    mockFetch.mockReturnValue(ok(story));
+    const { result } = await setup();
+    await waitFor(() => {
+      expect(result.current.state.canOpenLink).toBe(true);
+    });
+  });
+
   it('exposes errors and retries', async () => {
     mockFetch.mockReturnValue(httpError(500));
     const { result } = await setup();

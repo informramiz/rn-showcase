@@ -30,7 +30,7 @@ export function StoryDetailScreen() {
         </Text>
         {state.bodyText ? <Text style={{ color: colors.text, lineHeight: 21 }}>{state.bodyText}</Text> : null}
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
-          {story.url ? (
+          {state.canOpenLink ? (
             <Button testID="open-link" label={strings.story.openLink} grow onPress={actions.openLink} />
           ) : null}
           <Button

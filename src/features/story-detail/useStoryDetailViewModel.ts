@@ -8,6 +8,17 @@ import { hostname } from '@/shared/lib/format';
 import { htmlToText } from './comments';
 import { useItem } from './useItem';
 
+/** Only http(s) links may be opened; anything else (javascript:, file:, ...) is rejected. */
+export function isWebUrl(url: string | undefined): url is string {
+  if (!url) return false;
+  try {
+    const { protocol } = new URL(url);
+    return protocol === 'http:' || protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 /** Story detail: the item query (server state) plus bookmark and history stores (client state). */
 export function useStoryDetailViewModel() {
   const { id: idParam } = useLocalSearchParams<{ id: string }>();
@@ -27,6 +38,7 @@ export function useStoryDetailViewModel() {
       isPending,
       error,
       bookmarked,
+      canOpenLink: isWebUrl(story?.url),
       host: story ? hostname(story.url) : '',
       bodyText: story?.text ? htmlToText(story.text) : null,
     },
@@ -36,7 +48,7 @@ export function useStoryDetailViewModel() {
         if (story) toggleBookmark(toSummary(story));
       },
       openLink: () => {
-        if (story?.url) void WebBrowser.openBrowserAsync(story.url);
+        if (isWebUrl(story?.url)) void WebBrowser.openBrowserAsync(story.url);
       },
     },
   };
