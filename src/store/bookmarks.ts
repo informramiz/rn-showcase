@@ -19,13 +19,12 @@ interface BookmarksState {
   /** Most recently saved first. */
   items: StorySummary[];
   toggle: (story: StorySummary) => void;
-  isBookmarked: (id: number) => boolean;
   clear: () => void;
 }
 
 export const useBookmarks = create<BookmarksState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       items: [],
       toggle: (story) =>
         set((s) =>
@@ -33,7 +32,6 @@ export const useBookmarks = create<BookmarksState>()(
             ? { items: s.items.filter((i) => i.id !== story.id) }
             : { items: [story, ...s.items] },
         ),
-      isBookmarked: (id) => get().items.some((i) => i.id === id),
       clear: () => set({ items: [] }),
     }),
     { name: 'bookmarks', storage: zustandStorage, partialize: (s) => ({ items: s.items }) },

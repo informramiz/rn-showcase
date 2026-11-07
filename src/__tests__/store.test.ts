@@ -17,8 +17,7 @@ describe('bookmarks', () => {
     useBookmarks.getState().toggle(s(2));
     expect(useBookmarks.getState().items.map((i) => i.id)).toEqual([2, 1]);
     useBookmarks.getState().toggle(s(2));
-    expect(useBookmarks.getState().isBookmarked(2)).toBe(false);
-    expect(useBookmarks.getState().isBookmarked(1)).toBe(true);
+    expect(useBookmarks.getState().items.map((i) => i.id)).toEqual([1]);
   });
 
   it('toSummary keeps only the stored fields', () => {
@@ -41,8 +40,6 @@ describe('history', () => {
     h.markRead(s(2), 2);
     h.markRead(s(1), 3);
     expect(useHistory.getState().entries.map((e) => e.story.id)).toEqual([1, 2]);
-    expect(useHistory.getState().hasRead(2)).toBe(true);
-    expect(useHistory.getState().hasRead(9)).toBe(false);
   });
 
   it('caps the list', () => {

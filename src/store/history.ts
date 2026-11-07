@@ -14,13 +14,12 @@ interface HistoryState {
   /** Most recently read first, unique by story id, capped at HISTORY_LIMIT. */
   entries: HistoryEntry[];
   markRead: (story: StorySummary, now?: number) => void;
-  hasRead: (id: number) => boolean;
   clear: () => void;
 }
 
 export const useHistory = create<HistoryState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       entries: [],
       markRead: (story, now = Date.now()) =>
         set((s) => ({
@@ -29,7 +28,6 @@ export const useHistory = create<HistoryState>()(
             HISTORY_LIMIT,
           ),
         })),
-      hasRead: (id) => get().entries.some((e) => e.story.id === id),
       clear: () => set({ entries: [] }),
     }),
     { name: 'history', storage: zustandStorage, partialize: (s) => ({ entries: s.entries }) },

@@ -1,34 +1,39 @@
 import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import type { ThreadRow } from '../lib/comments';
+import type { HNItem } from '../api';
 import { htmlToText } from '../lib/comments';
 import { timeAgo } from '../lib/format';
 import { useTheme } from '../theme';
 
 interface Props {
-  row: ThreadRow;
+  id: number;
+  depth: number;
+  /** Undefined while loading or when the load failed. */
+  item: HNItem | undefined;
+  loading: boolean;
+  replyCount: number;
+  expanded: boolean;
   onToggle: (id: number) => void;
-  onRetry: (id: number) => void;
+  onRetry: () => void;
 }
 
 const INDENT = 14;
 
-function CommentRowBase({ row, onToggle, onRetry }: Props) {
+function CommentRowBase({ id, depth, item, loading, replyCount, expanded, onToggle, onRetry }: Props) {
   const { colors } = useTheme();
-  const { state, depth } = row;
   const indent = {
     marginLeft: Math.min(depth, 6) * INDENT,
     borderLeftWidth: depth > 0 ? 2 : 0,
     borderColor: colors.border,
   };
 
-  if (state.status !== 'loaded') {
+  if (!item) {
     return (
       <View style={[{ padding: 12 }, indent]}>
-        {state.status === 'loading' ? (
+        {loading ? (
           <Text style={{ color: colors.textMuted }}>Loading comment…</Text>
         ) : (
-          <Pressable onPress={() => onRetry(row.id)} accessibilityRole="button">
+          <Pressable onPress={onRetry} accessibilityRole="button">
             <Text style={{ color: colors.danger }}>Failed to load. Tap to retry.</Text>
           </Pressable>
         )}
@@ -36,19 +41,18 @@ function CommentRowBase({ row, onToggle, onRetry }: Props) {
     );
   }
 
-  const { item } = state;
   const hint =
-    row.replyCount === 0
+    replyCount === 0
       ? ''
-      : row.expanded
+      : expanded
         ? 'Tap to collapse'
-        : `${row.replyCount} ${row.replyCount === 1 ? 'reply' : 'replies'}, tap to expand`;
+        : `${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}, tap to expand`;
   return (
     <Pressable
-      testID={`comment-${row.id}`}
+      testID={`comment-${id}`}
       accessibilityRole="button"
-      accessibilityState={{ expanded: row.expanded }}
-      onPress={() => onToggle(row.id)}
+      accessibilityState={{ expanded }}
+      onPress={() => onToggle(id)}
       style={[{ padding: 12, backgroundColor: colors.surface }, indent]}
     >
       <Text style={{ color: colors.textMuted, fontSize: 12 }}>

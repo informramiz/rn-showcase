@@ -1,48 +1,4 @@
-import { flattenThread, htmlToText, toggleSet, type ItemState } from '../lib/comments';
-
-const loaded = (id: number, kids?: number[], extra = {}): ItemState => ({
-  status: 'loaded',
-  item: { id, kids, ...extra },
-});
-
-describe('flattenThread', () => {
-  const items: Record<number, ItemState> = {
-    1: loaded(1, [3, 4]),
-    2: loaded(2),
-    3: loaded(3, [5]),
-    4: loaded(4, undefined, { deleted: true }),
-    5: loaded(5),
-  };
-
-  it('shows only roots when nothing is expanded', () => {
-    const rows = flattenThread([1, 2], items, new Set());
-    expect(rows.map((r) => [r.id, r.depth])).toEqual([
-      [1, 0],
-      [2, 0],
-    ]);
-    expect(rows[0]?.replyCount).toBe(2);
-  });
-
-  it('shows children with depth for expanded nodes and skips deleted ones', () => {
-    const rows = flattenThread([1, 2], items, new Set([1, 3]));
-    expect(rows.map((r) => [r.id, r.depth])).toEqual([
-      [1, 0],
-      [3, 1],
-      [5, 2],
-      [2, 0],
-    ]);
-  });
-
-  it('hides a whole subtree when the parent is collapsed', () => {
-    const rows = flattenThread([1], items, new Set([3]));
-    expect(rows.map((r) => r.id)).toEqual([1]);
-  });
-
-  it('treats unknown ids as loading', () => {
-    const rows = flattenThread([42], {}, new Set());
-    expect(rows[0]?.state.status).toBe('loading');
-  });
-});
+import { htmlToText, toggleSet } from '../lib/comments';
 
 describe('toggleSet', () => {
   it('adds and removes without mutating', () => {
