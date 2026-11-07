@@ -22,7 +22,7 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="story/[id]" options={{ title: 'Story' }} />
+        <Stack.Screen name="story/[id]" options={{ title: 'Story', headerBackTitle: 'Stories' }} />
       </Stack>
     </PersistQueryClientProvider>
   );
