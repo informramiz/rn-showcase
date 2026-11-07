@@ -1,5 +1,7 @@
 # HN Reader
 
+**Live demo: https://informramiz.github.io/rn-showcase/** (web build of the same app, best viewed at phone width)
+
 A Hacker News client built with React Native (Expo, SDK 58) and TypeScript. It reads the public [HN Firebase API](https://github.com/HackerNews/API), needs no API key, and works offline from cached data.
 
 Built by Ramiz Raja as a small but complete example of production-style React Native: typed API layer, server-state caching, persisted local state, tests, CI and release config.
@@ -15,11 +17,11 @@ Built by Ramiz Raja as a small but complete example of production-style React Na
 
 ## Screenshots
 
-_Placeholder. Add captures to `docs/screenshots/` and link them here._
+Captured from the web demo at 390px width (not a native simulator): stories, story detail with an expanded comment, saved, settings in dark mode.
 
-| Stories | Story detail | Saved | Settings |
-| ------- | ------------ | ----- | -------- |
-| TBD     | TBD          | TBD   | TBD      |
+| Stories                                                    | Story detail                                              | Saved                                                        | Settings (dark)                                                  |
+| ---------------------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------- |
+| <img src="docs/screenshots/web-1-stories.png" width="200"> | <img src="docs/screenshots/web-2-detail.png" width="200"> | <img src="docs/screenshots/web-3-bookmarks.png" width="200"> | <img src="docs/screenshots/web-4-settings-dark.png" width="200"> |
 
 ## Architecture
 
@@ -79,6 +81,19 @@ npx expo export       # bundle sanity check
 The tests cover the API layer (success, null item, HTTP error, network error, bad JSON, timeout, batching), the comment tree logic, the stores, and four screen tests (feed loading and navigation, error and retry, bookmarks, settings).
 
 `.maestro/smoke.yaml` is a UI flow (launch, scroll, open a story, bookmark it, check the Saved tab). Run it against an installed build with `maestro test .maestro/smoke.yaml`.
+
+## Web demo
+
+`npx expo export -p web` builds a single-page app. `.github/workflows/pages.yml` deploys it to GitHub Pages under `/rn-showcase` (`experiments.baseUrl`). Known limits on web:
+
+- Pages has no SPA fallback, so the workflow copies `index.html` to `404.html`. Opening a deep link such as `/story/123` directly works, but the server answers HTTP 404 before the app loads.
+- Storage uses `localStorage` through AsyncStorage, so bookmarks and cache are per browser.
+- Pull to refresh does not exist with a mouse. Reload the page instead.
+- "Open link" opens a new browser tab instead of an in-app browser.
+
+## Store release
+
+The app is configured for EAS (`eas.json`, bundle id `com.codebyramiz.hnreader`). Store submission is deferred, and no builds have been made.
 
 ## Release config
 
