@@ -1,6 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
 import Constants from 'expo-constants';
-import * as WebBrowser from 'expo-web-browser';
 import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { clearQueryCache } from '../../src/hooks/queryClient';
 import { useBookmarks } from '../../src/store/bookmarks';
@@ -13,9 +12,6 @@ const MODES: { value: ThemeMode; label: string }[] = [
   { value: 'light', label: 'Light' },
   { value: 'dark', label: 'Dark' },
 ];
-
-// Placeholder until a real privacy policy is hosted.
-export const PRIVACY_URL = 'https://example.com/privacy';
 
 export default function SettingsScreen() {
   const { colors } = useTheme();
@@ -92,13 +88,6 @@ export default function SettingsScreen() {
         <Text style={{ color: colors.textMuted }}>
           Data from the public Hacker News API. Not affiliated with Y Combinator.
         </Text>
-        <Pressable
-          accessibilityRole="link"
-          onPress={() => WebBrowser.openBrowserAsync(PRIVACY_URL)}
-          style={button}
-        >
-          <Text style={{ color: colors.accent }}>Privacy policy</Text>
-        </Pressable>
       </View>
     </ScrollView>
   );

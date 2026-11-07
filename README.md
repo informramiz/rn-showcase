@@ -13,7 +13,7 @@ Built by Ramiz Raja as a small but complete example of production-style React Na
 - Links open in the in-app browser (`expo-web-browser`).
 - Bookmarks saved on device, and reading history (read stories are dimmed).
 - Pull to refresh, loading skeletons, error state with retry, offline banner. Cached data stays visible offline.
-- Light and dark theme following the system, with an override in Settings. Settings also has clear cache and a privacy link (placeholder URL).
+- Light and dark theme following the system, with an override in Settings. Settings also has clear cache and remove bookmarks.
 
 ## Screenshots
 
@@ -112,5 +112,5 @@ The app is configured for EAS (`eas.json`, bundle id `com.codebyramiz.hnreader`)
 - **Comment text is converted to plain text.** HN comments use a small HTML subset. Links become bare URLs. Rendering real HTML would add a dependency for little gain here.
 - **Refresh keeps only page one.** Pull to refresh drops the cached ID list and the extra pages, so it does not re-download everything you scrolled through.
 - **Clear cache also clears history.** Bookmarks are kept. Bookmarks store a summary of the story, so they open offline from the list, but story detail and comments need a cached or live fetch.
-- **The privacy link is a placeholder** (`example.com`). Replace `PRIVACY_URL` in `app/(tabs)/settings.tsx` before release.
+- **No privacy policy link.** The app collects no data: no accounts, analytics or tracking. Bookmarks, history and settings stay on the device. A store release would still need a hosted policy URL.
 - **Local `watchman` is bypassed in the test script** (`--watchman=false`) so tests do not depend on it.
