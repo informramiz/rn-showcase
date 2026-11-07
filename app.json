@@ -7,14 +7,31 @@
     "icon": "./assets/icon.png",
     "scheme": "hnreader",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "splash": { "image": "./assets/splash.png", "resizeMode": "contain", "backgroundColor": "#d9480f" },
-    "ios": { "bundleIdentifier": "com.codebyramiz.hnreader", "supportsTablet": true },
+    "ios": {
+      "bundleIdentifier": "com.codebyramiz.hnreader",
+      "supportsTablet": true
+    },
     "android": {
       "package": "com.codebyramiz.hnreader",
-      "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon.png", "backgroundColor": "#d9480f" }
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#d9480f"
+      }
     },
-    "plugins": ["expo-router", "expo-web-browser"],
-    "experiments": { "typedRoutes": true }
+    "plugins": [
+      "expo-router",
+      "expo-web-browser",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "backgroundColor": "#d9480f",
+          "imageWidth": 200
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
   }
 }
