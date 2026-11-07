@@ -1,4 +1,5 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { Alert, Platform } from 'react-native';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 import BookmarksScreen from '../../app/(tabs)/bookmarks';
 import StoriesScreen from '../../app/(tabs)/index';
 import SettingsScreen from '../../app/(tabs)/settings';
@@ -59,5 +60,44 @@ describe('SettingsScreen', () => {
     await renderWithClient(<SettingsScreen />);
     await fireEvent.press(screen.getByRole('radio', { name: 'Dark' }));
     expect(useSettings.getState().themeMode).toBe('dark');
+  });
+
+  describe('remove all bookmarks', () => {
+    const press = () => fireEvent.press(screen.getByRole('button', { name: 'Remove all bookmarks' }));
+    const originalOS = Platform.OS;
+    afterEach(() => {
+      Platform.OS = originalOS;
+      jest.restoreAllMocks();
+    });
+
+    it('asks first on native and only removes after confirming', async () => {
+      const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+      useBookmarks.setState({ items: [{ id: 1, title: 'Keep me' }] });
+      await renderWithClient(<SettingsScreen />);
+      await press();
+      expect(useBookmarks.getState().items).toHaveLength(1);
+      const buttons = alert.mock.calls[0]?.[2];
+      await act(() => {
+        buttons?.find((b) => b.text === 'Cancel')?.onPress?.();
+      });
+      expect(useBookmarks.getState().items).toHaveLength(1);
+      await act(() => {
+        buttons?.find((b) => b.text === 'Remove')?.onPress?.();
+      });
+      expect(useBookmarks.getState().items).toHaveLength(0);
+    });
+
+    it('uses window.confirm on web', async () => {
+      Platform.OS = 'web';
+      const confirm = jest.fn().mockReturnValueOnce(false).mockReturnValueOnce(true);
+      Object.assign(globalThis, { window: { confirm } });
+      useBookmarks.setState({ items: [{ id: 1, title: 'Keep me' }] });
+      await renderWithClient(<SettingsScreen />);
+      await press();
+      expect(useBookmarks.getState().items).toHaveLength(1);
+      await press();
+      expect(confirm).toHaveBeenCalledTimes(2);
+      expect(useBookmarks.getState().items).toHaveLength(0);
+    });
   });
 });

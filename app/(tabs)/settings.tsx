@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import Constants from 'expo-constants';
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { clearQueryCache } from '../../src/hooks/queryClient';
 import { strings } from '../../src/i18n/strings';
 import { useBookmarks } from '../../src/store/bookmarks';
@@ -17,6 +17,19 @@ export default function SettingsScreen() {
   const setMode = useSettings((s) => s.setThemeMode);
   const clearHistory = useHistory((s) => s.clear);
   const clearBookmarks = useBookmarks((s) => s.clear);
+
+  const onClearBookmarks = () => {
+    const { removeBookmarksTitle: title, removeBookmarksBody: body, cancel, remove } = strings.settings;
+    if (Platform.OS === 'web') {
+      // Alert.alert buttons do not run on react-native-web.
+      if (window.confirm(`${title}\n${body}`)) clearBookmarks();
+      return;
+    }
+    Alert.alert(title, body, [
+      { text: cancel, style: 'cancel' },
+      { text: remove, style: 'destructive', onPress: clearBookmarks },
+    ]);
+  };
 
   const onClearCache = async () => {
     await clearQueryCache(client);
@@ -76,7 +89,7 @@ export default function SettingsScreen() {
         <Pressable testID="clear-cache" accessibilityRole="button" onPress={onClearCache} style={button}>
           <Text style={{ color: colors.text }}>{strings.settings.clearCache}</Text>
         </Pressable>
-        <Pressable accessibilityRole="button" onPress={clearBookmarks} style={button}>
+        <Pressable accessibilityRole="button" onPress={onClearBookmarks} style={button}>
           <Text style={{ color: colors.danger }}>{strings.settings.removeBookmarks}</Text>
         </Pressable>
       </View>
