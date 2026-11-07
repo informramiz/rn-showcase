@@ -15,9 +15,11 @@ appId: com.codebyramiz.hnreader
     direction: UP
 - tapOn:
     id: story-item-0
-- extendedWaitUntil:
-    visible:
+# Long text posts push the button below the fold, so scroll to it.
+- scrollUntilVisible:
+    element:
       id: bookmark-button
+    direction: DOWN
     timeout: 20000
 - tapOn:
     id: bookmark-button
