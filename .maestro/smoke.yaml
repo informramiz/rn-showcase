@@ -25,5 +25,7 @@ appId: com.codebyramiz.hnreader
 - back
 - tapOn:
     id: tab-bookmarks
+# The bookmarks screen has its own list id and must not show the empty state.
 - assertVisible:
-    id: story-item-0
+    id: bookmarks-list
+- assertNotVisible: No bookmarks yet

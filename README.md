@@ -73,12 +73,14 @@ npx expo start        # then open in Expo Go, or press i / a for a simulator
 npm run lint
 npm run format:check
 npm run typecheck
-npm test
+npm test -- --coverage
 npm run doctor        # expo-doctor
 npx expo export       # bundle sanity check
 ```
 
-The tests cover the API layer (success, null item, HTTP error, network error, bad JSON, timeout, batching), the comment tree logic, the stores, and four screen tests (feed loading and navigation, error and retry, bookmarks, settings).
+Tests mock at the `fetch` boundary and query by role or visible text. They cover the API layer (including payload validation, errors, timeout, batching), `describeError`, the query client (retry policy, cache clearing), the stores, online/offline state and banner, the story screen (loading, error with retry, bookmark toggle), the comment thread (lazy expand, retry), the feed, bookmarks and settings screens (including the remove-all confirmation).
+
+`npm test -- --coverage` currently reports about 90% lines. `jest.config.js` enforces a floor (88% statements and lines, 85% functions, 82% branches), and CI runs with coverage. Not covered: the tab layout and root layout wiring, which the Maestro smoke flow exercises on a device.
 
 `.maestro/smoke.yaml` is a UI flow (launch, scroll, open a story, bookmark it, check the Saved tab). Run it against an installed build with `maestro test .maestro/smoke.yaml`.
 
