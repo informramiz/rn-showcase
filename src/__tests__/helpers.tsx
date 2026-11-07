@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react-native';
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 export const mockFetch = jest.fn<Promise<unknown>, [string, RequestInit?]>();
 
@@ -24,4 +24,11 @@ export function newTestClient(): QueryClient {
 export async function renderWithClient(ui: ReactElement, client: QueryClient = newTestClient()) {
   const utils = await render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
   return { ...utils, client };
+}
+
+/** renderHook options wrapping the hook in a QueryClientProvider. */
+export function clientWrapper(client: QueryClient = newTestClient()) {
+  return function ClientWrapper({ children }: { children: ReactNode }) {
+    return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  };
 }

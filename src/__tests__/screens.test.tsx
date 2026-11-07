@@ -1,10 +1,12 @@
 import { Alert, Platform } from 'react-native';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 import BookmarksScreen from '../../app/(tabs)/bookmarks';
-import StoriesScreen from '../../app/(tabs)/index';
+import StoriesScreen from '../../app/(tabs)';
+import HistoryScreen from '../../app/(tabs)/history';
 import SettingsScreen from '../../app/(tabs)/settings';
-import { useBookmarks } from '../store/bookmarks';
-import { useSettings } from '../store/settings';
+import { useBookmarks } from '@/features/bookmarks/store';
+import { useHistory } from '@/features/history/store';
+import { useSettings } from '@/features/settings/store';
 import { installFetch, itemIdFromUrl, mockFetch, ok, renderWithClient } from './helpers';
 import { routerMock } from './routerMock';
 
@@ -51,6 +53,18 @@ describe('BookmarksScreen', () => {
     useBookmarks.setState({ items: [{ id: 7, title: 'Saved one' }] });
     await renderWithClient(<BookmarksScreen />);
     expect(screen.getByText('Saved one')).toBeTruthy();
+  });
+});
+
+describe('HistoryScreen', () => {
+  it('shows empty state, then read stories', async () => {
+    useHistory.setState({ entries: [] });
+    await renderWithClient(<HistoryScreen />);
+    expect(screen.getByText('Nothing read yet')).toBeTruthy();
+    await screen.unmount();
+    useHistory.setState({ entries: [{ story: { id: 3, title: 'Read one' }, readAt: 1 }] });
+    await renderWithClient(<HistoryScreen />);
+    expect(screen.getByText('Read one')).toBeTruthy();
   });
 });
 

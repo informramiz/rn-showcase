@@ -2,10 +2,10 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import { CACHE_MAX_AGE_MS, createQueryClient, persister } from '../src/hooks/queryClient';
-import { useOnlineManagerSync } from '../src/hooks/useOnline';
-import { strings } from '../src/i18n/strings';
-import { useTheme } from '../src/theme';
+import { CACHE_MAX_AGE_MS, createQueryClient, persister } from '@/shared/query/queryClient';
+import { useOnlineManagerSync } from '@/shared/hooks/useOnline';
+import { strings } from '@/shared/i18n/strings';
+import { useTheme } from '@/shared/theme';
 
 export default function RootLayout() {
   const [client] = useState(createQueryClient);

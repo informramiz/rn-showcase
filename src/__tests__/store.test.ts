@@ -1,7 +1,8 @@
-import { toSummary, useBookmarks } from '../store/bookmarks';
-import { HISTORY_LIMIT, useHistory } from '../store/history';
-import { useSettings } from '../store/settings';
-import { resolveScheme } from '../theme';
+import { useBookmarks } from '@/features/bookmarks/store';
+import { toSummary } from '@/shared/api';
+import { HISTORY_LIMIT, useHistory } from '@/features/history/store';
+import { useSettings } from '@/features/settings/store';
+import { resolveScheme } from '@/shared/theme';
 
 const s = (id: number) => ({ id, title: `Story ${id}` });
 
