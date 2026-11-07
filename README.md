@@ -17,11 +17,11 @@ Built by Ramiz Raja as a small but complete example of production-style React Na
 
 ## Screenshots
 
-Captured from the web demo at 390px width (not a native simulator): stories, story detail with an expanded comment, saved, settings in dark mode.
+Captured on an iOS Simulator (iPhone, Expo Go): stories, story detail with an expanded comment, saved, settings in dark mode.
 
 | Stories                                                    | Story detail                                              | Saved                                                        | Settings (dark)                                                  |
 | ---------------------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------- |
-| <img src="docs/screenshots/web-1-stories.png" width="200"> | <img src="docs/screenshots/web-2-detail.png" width="200"> | <img src="docs/screenshots/web-3-bookmarks.png" width="200"> | <img src="docs/screenshots/web-4-settings-dark.png" width="200"> |
+| <img src="docs/screenshots/ios-1-stories.png" width="200"> | <img src="docs/screenshots/ios-2-detail.png" width="200"> | <img src="docs/screenshots/ios-3-bookmarks.png" width="200"> | <img src="docs/screenshots/ios-4-settings-dark.png" width="200"> |
 
 ## Architecture
 
@@ -84,7 +84,12 @@ The tests cover the API layer (success, null item, HTTP error, network error, ba
 
 ## Web demo
 
-`npx expo export -p web` builds a single-page app. `.github/workflows/pages.yml` deploys it to GitHub Pages under `/rn-showcase` (`experiments.baseUrl`). Known limits on web:
+Web screenshots (390px wide):
+
+| Stories                                                                                                                                                                        | Story detail                                              | Saved                                                        | Settings (dark)                                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------- |
+| <img src="docs/screenshots/web-1-stories.png" width="200">                                                                                                                     | <img src="docs/screenshots/web-2-detail.png" width="200"> | <img src="docs/screenshots/web-3-bookmarks.png" width="200"> | <img src="docs/screenshots/web-4-settings-dark.png" width="200"> |
+| `npx expo export -p web` builds a single-page app. `.github/workflows/pages.yml` deploys it to GitHub Pages under `/rn-showcase` (`experiments.baseUrl`). Known limits on web: |
 
 - Pages has no SPA fallback, so the workflow copies `index.html` to `404.html`. Opening a deep link such as `/story/123` directly works, but the server answers HTTP 404 before the app loads.
 - Storage uses `localStorage` through AsyncStorage, so bookmarks and cache are per browser.
