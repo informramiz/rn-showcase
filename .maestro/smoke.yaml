@@ -22,7 +22,18 @@ appId: com.codebyramiz.hnreader
 - tapOn:
     id: bookmark-button
 - assertVisible: Saved
-- back
+# Maestro's `back` is a no-op on iOS, so tap the native header back button there.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          id: BackButton
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
 - tapOn:
     id: tab-bookmarks
 # The bookmarks screen has its own list id and must not show the empty state.
