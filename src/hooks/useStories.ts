@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQueryClient, type InfiniteData } from '@tanstack/react-query';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { fetchStoryIds, fetchStoryPage, PAGE_SIZE, type FeedKind, type HNItem } from '../api';
 
 export interface StoryPage {
@@ -46,6 +46,7 @@ export function useStories(feed: FeedKind) {
     }
   }, [client, feed, refetch]);
 
-  const stories = query.data?.pages.flatMap((p) => p.items) ?? [];
+  const pages = query.data?.pages;
+  const stories = useMemo(() => pages?.flatMap((p) => p.items) ?? [], [pages]);
   return { ...query, stories, refreshing, refresh };
 }

@@ -1,4 +1,4 @@
-import { FlashList } from '@shopify/flash-list';
+import { FlashList, type ListRenderItemInfo } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { useCallback } from 'react';
 import { ActivityIndicator, RefreshControl } from 'react-native';
@@ -18,6 +18,8 @@ interface Props {
   emptyHint?: string;
   testID?: string;
 }
+
+const keyExtractor = (s: StorySummary) => String(s.id);
 
 export function StoryList({
   stories,
@@ -41,12 +43,19 @@ export function StoryList({
     [router, markRead],
   );
 
+  const renderItem = useCallback(
+    ({ item, index }: ListRenderItemInfo<StorySummary>) => (
+      <StoryRow story={item} index={index} onPress={open} />
+    ),
+    [open],
+  );
+
   return (
     <FlashList
       testID={testID}
       data={stories}
-      keyExtractor={(s) => String(s.id)}
-      renderItem={({ item, index }) => <StoryRow story={item} index={index} onPress={open} />}
+      keyExtractor={keyExtractor}
+      renderItem={renderItem}
       onEndReached={onEndReached}
       onEndReachedThreshold={0.6}
       refreshControl={
