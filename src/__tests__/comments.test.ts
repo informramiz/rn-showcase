@@ -20,7 +20,7 @@ describe('flattenThread', () => {
       [1, 0],
       [2, 0],
     ]);
-    expect(rows[0].replyCount).toBe(2);
+    expect(rows[0]?.replyCount).toBe(2);
   });
 
   it('shows children with depth for expanded nodes and skips deleted ones', () => {
@@ -40,7 +40,7 @@ describe('flattenThread', () => {
 
   it('treats unknown ids as loading', () => {
     const rows = flattenThread([42], {}, new Set());
-    expect(rows[0].state.status).toBe('loading');
+    expect(rows[0]?.state.status).toBe('loading');
   });
 });
 

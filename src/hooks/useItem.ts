@@ -11,7 +11,7 @@ export function useItem(id: number) {
 export function useItemLoader() {
   const client = useQueryClient();
   return (id: number) =>
-    client.fetchQuery({
+    client.query({
       queryKey: itemKey(id),
       queryFn: ({ signal }) => fetchItem(id, signal),
       staleTime: 5 * 60_000,

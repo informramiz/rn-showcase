@@ -50,14 +50,16 @@ export default function StoriesScreen() {
       {q.isPending ? (
         <StoryListSkeleton />
       ) : q.isError && q.stories.length === 0 ? (
-        <ErrorState error={q.error} onRetry={() => q.refetch()} />
+        <ErrorState error={q.error} onRetry={() => void q.refetch()} />
       ) : (
         <StoryList
           testID="story-list"
           stories={q.stories.map(toSummary)}
           refreshing={q.refreshing}
-          onRefresh={q.refresh}
-          onEndReached={() => q.hasNextPage && !q.isFetchingNextPage && q.fetchNextPage()}
+          onRefresh={() => void q.refresh()}
+          onEndReached={() => {
+            if (q.hasNextPage && !q.isFetchingNextPage) void q.fetchNextPage();
+          }}
           loadingMore={q.isFetchingNextPage}
           emptyTitle="No stories"
         />

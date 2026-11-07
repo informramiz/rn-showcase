@@ -15,9 +15,9 @@ interface GetJsonOptions {
 export async function getJson<T>(path: string, options: GetJsonOptions = {}): Promise<T> {
   const { timeoutMs = DEFAULT_TIMEOUT_MS, signal } = options;
   const controller = new AbortController();
-  let timedOut = false;
+  const state = { timedOut: false };
   const timer = setTimeout(() => {
-    timedOut = true;
+    state.timedOut = true;
     controller.abort();
   }, timeoutMs);
   const onAbort = () => controller.abort();
@@ -35,7 +35,7 @@ export async function getJson<T>(path: string, options: GetJsonOptions = {}): Pr
     }
   } catch (e) {
     if (e instanceof ApiError) throw e;
-    if (timedOut) throw new ApiError('timeout', `Timed out after ${timeoutMs}ms: ${path}`);
+    if (state.timedOut) throw new ApiError('timeout', `Timed out after ${timeoutMs}ms: ${path}`);
     if (signal?.aborted) throw e;
     throw new ApiError('network', e instanceof Error ? e.message : 'Network request failed');
   } finally {

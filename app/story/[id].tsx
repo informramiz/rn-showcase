@@ -26,9 +26,10 @@ export default function StoryDetailScreen() {
   }, [story, markRead]);
 
   if (isPending) return <StoryRowSkeleton />;
-  if (error || !story) return <ErrorState error={error} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => void refetch()} />;
 
-  const host = hostname(story.url);
+  const url = story.url;
+  const host = hostname(url);
   return (
     <ScrollView testID="story-detail" contentContainerStyle={{ paddingBottom: 48 }}>
       <Stack.Screen options={{ title: host || 'Story' }} />
@@ -43,11 +44,11 @@ export default function StoryDetailScreen() {
           <Text style={{ color: colors.text, lineHeight: 21 }}>{htmlToText(story.text)}</Text>
         ) : null}
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
-          {story.url ? (
+          {url ? (
             <Pressable
               testID="open-link"
               accessibilityRole="button"
-              onPress={() => WebBrowser.openBrowserAsync(story.url as string)}
+              onPress={() => WebBrowser.openBrowserAsync(url)}
               style={{
                 flex: 1,
                 backgroundColor: colors.accent,

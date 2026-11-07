@@ -24,7 +24,7 @@ export function useStories(feed: FeedKind) {
     queryKey: storiesKey(feed),
     initialPageParam: 0,
     queryFn: async ({ pageParam, signal }) => {
-      const ids = await client.fetchQuery({
+      const ids = await client.query({
         queryKey: idsKey(feed),
         queryFn: ({ signal: s }) => fetchStoryIds(feed, s),
         staleTime: 60_000,

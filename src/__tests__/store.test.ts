@@ -48,7 +48,7 @@ describe('history', () => {
   it('caps the list', () => {
     for (let i = 0; i < HISTORY_LIMIT + 5; i++) useHistory.getState().markRead(s(i), i);
     expect(useHistory.getState().entries).toHaveLength(HISTORY_LIMIT);
-    expect(useHistory.getState().entries[0].story.id).toBe(HISTORY_LIMIT + 4);
+    expect(useHistory.getState().entries[0]?.story.id).toBe(HISTORY_LIMIT + 4);
   });
 });
 
