@@ -10,9 +10,10 @@ interface GetJsonOptions {
 
 /**
  * GET a JSON document with a timeout. Every failure is mapped to an ApiError
- * so callers never have to inspect raw fetch errors.
+ * so callers never have to inspect raw fetch errors. The body is returned as
+ * `unknown`: callers validate it before use (see `hn.ts`).
  */
-export async function getJson<T>(path: string, options: GetJsonOptions = {}): Promise<T> {
+export async function getJson(path: string, options: GetJsonOptions = {}): Promise<unknown> {
   const { timeoutMs = DEFAULT_TIMEOUT_MS, signal } = options;
   const controller = new AbortController();
   const state = { timedOut: false };
@@ -29,7 +30,7 @@ export async function getJson<T>(path: string, options: GetJsonOptions = {}): Pr
       throw new ApiError('http', `HTTP ${res.status} for ${path}`, res.status);
     }
     try {
-      return (await res.json()) as T;
+      return (await res.json()) as unknown;
     } catch {
       throw new ApiError('parse', `Invalid JSON for ${path}`);
     }

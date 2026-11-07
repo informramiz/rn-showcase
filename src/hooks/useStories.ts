@@ -14,16 +14,10 @@ export function useStories(feed: FeedKind) {
   const client = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
 
-  const query = useInfiniteQuery<
-    StoryPage,
-    Error,
-    InfiniteData<StoryPage, number>,
-    readonly unknown[],
-    number
-  >({
+  const query = useInfiniteQuery({
     queryKey: storiesKey(feed),
     initialPageParam: 0,
-    queryFn: async ({ pageParam, signal }) => {
+    queryFn: async ({ pageParam, signal }): Promise<StoryPage> => {
       const ids = await client.query({
         queryKey: idsKey(feed),
         queryFn: ({ signal: s }) => fetchStoryIds(feed, s),

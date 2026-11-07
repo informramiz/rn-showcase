@@ -92,3 +92,37 @@ describe('api layer', () => {
     expect(mockFetch).toHaveBeenCalledTimes(25);
   });
 });
+
+describe('payload validation', () => {
+  it('rejects ids that are not numbers', async () => {
+    mockFetch.mockReturnValue(ok([1, 'two']));
+    await expect(fetchStoryIds('top')).rejects.toMatchObject({ kind: 'parse' });
+  });
+
+  it('rejects an item without a numeric id', async () => {
+    mockFetch.mockReturnValue(ok({ title: 'no id' }));
+    await expect(fetchItem(1)).rejects.toMatchObject({ kind: 'parse' });
+  });
+
+  it('rejects a non-object item', async () => {
+    mockFetch.mockReturnValue(ok('nope'));
+    await expect(fetchItem(1)).rejects.toMatchObject({ kind: 'parse' });
+  });
+
+  it('rejects a field with the wrong type', async () => {
+    mockFetch.mockReturnValue(ok({ id: 1, title: 42 }));
+    await expect(fetchItem(1)).rejects.toMatchObject({ kind: 'parse' });
+    mockFetch.mockReturnValue(ok({ id: 1, type: 'banana' }));
+    await expect(fetchItem(1)).rejects.toMatchObject({ kind: 'parse' });
+  });
+
+  it('keeps known fields and drops unknown ones', async () => {
+    mockFetch.mockReturnValue(
+      ok({ id: 1, type: 'story', title: 't', kids: [2], score: 3, deleted: false, extra: 'x', by: null }),
+    );
+    const item = await fetchItem(1);
+    expect(item).toMatchObject({ id: 1, type: 'story', title: 't', kids: [2], score: 3, deleted: false });
+    expect(item).not.toHaveProperty('extra');
+    expect(item.by).toBeUndefined();
+  });
+});
