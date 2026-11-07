@@ -37,6 +37,10 @@ export const darkColors: Colors = {
   banner: '#495057',
 };
 
+/** Spacing scale (px) and corner radii shared by components. */
+export const spacing = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 } as const;
+export const radius = { sm: 8, md: 10, pill: 20 } as const;
+
 export function resolveScheme(mode: ThemeMode, system: 'light' | 'dark' | null | undefined) {
   if (mode === 'system') return system === 'dark' ? 'dark' : 'light';
   return mode;

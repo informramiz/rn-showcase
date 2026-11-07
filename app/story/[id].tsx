@@ -1,7 +1,8 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
+import { Button } from '../../src/components/Button';
 import { CommentThread } from '../../src/components/CommentThread';
 import { ErrorState } from '../../src/components/ErrorState';
 import { StoryRowSkeleton } from '../../src/components/Skeleton';
@@ -47,39 +48,21 @@ export default function StoryDetailScreen() {
         ) : null}
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
           {url ? (
-            <Pressable
+            <Button
               testID="open-link"
-              accessibilityRole="button"
-              onPress={() => WebBrowser.openBrowserAsync(url)}
-              style={{
-                flex: 1,
-                backgroundColor: colors.accent,
-                padding: 12,
-                borderRadius: 8,
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ color: '#fff', fontWeight: '600' }}>{strings.story.openLink}</Text>
-            </Pressable>
+              label={strings.story.openLink}
+              grow
+              onPress={() => void WebBrowser.openBrowserAsync(url)}
+            />
           ) : null}
-          <Pressable
+          <Button
             testID="bookmark-button"
-            accessibilityRole="button"
-            accessibilityState={{ selected: bookmarked }}
+            variant="outline"
+            grow
+            selected={bookmarked}
+            label={bookmarked ? strings.story.saved : strings.story.save}
             onPress={() => toggleBookmark(toSummary(story))}
-            style={{
-              flex: 1,
-              borderWidth: 1,
-              borderColor: colors.accent,
-              padding: 12,
-              borderRadius: 8,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ color: colors.accent, fontWeight: '600' }}>
-              {bookmarked ? strings.story.saved : strings.story.save}
-            </Text>
-          </Pressable>
+          />
         </View>
       </View>
       {story.kids?.length ? (

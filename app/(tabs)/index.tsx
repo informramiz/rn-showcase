@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { ScrollView, View } from 'react-native';
 import { FEEDS, type FeedKind } from '../../src/api';
+import { Chip } from '../../src/components/Chip';
 import { ErrorState } from '../../src/components/ErrorState';
 import { OfflineBanner } from '../../src/components/OfflineBanner';
 import { StoryListSkeleton } from '../../src/components/Skeleton';
@@ -8,12 +9,13 @@ import { StoryList } from '../../src/components/StoryList';
 import { useStories } from '../../src/hooks/useStories';
 import { strings } from '../../src/i18n/strings';
 import { toSummary } from '../../src/store/bookmarks';
-import { useTheme } from '../../src/theme';
+import { spacing, useTheme } from '../../src/theme';
 
 export default function StoriesScreen() {
   const [feed, setFeed] = useState<FeedKind>('top');
   const { colors } = useTheme();
   const q = useStories(feed);
+  const summaries = useMemo(() => q.stories.map(toSummary), [q.stories]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -22,30 +24,17 @@ export default function StoriesScreen() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ padding: 8, gap: 8 }}
+          contentContainerStyle={{ padding: spacing.sm, gap: spacing.sm }}
         >
-          {FEEDS.map((f) => {
-            const active = f === feed;
-            return (
-              <Pressable
-                key={f}
-                testID={`feed-${f}`}
-                accessibilityRole="tab"
-                accessibilityState={{ selected: active }}
-                onPress={() => setFeed(f)}
-                style={{
-                  paddingHorizontal: 16,
-                  paddingVertical: 8,
-                  borderRadius: 20,
-                  backgroundColor: active ? colors.accent : colors.background,
-                }}
-              >
-                <Text style={{ color: active ? '#fff' : colors.text, fontWeight: '600' }}>
-                  {strings.feeds[f]}
-                </Text>
-              </Pressable>
-            );
-          })}
+          {FEEDS.map((f) => (
+            <Chip
+              key={f}
+              testID={`feed-${f}`}
+              label={strings.feeds[f]}
+              active={f === feed}
+              onPress={() => setFeed(f)}
+            />
+          ))}
         </ScrollView>
       </View>
       {q.isPending ? (
@@ -55,7 +44,7 @@ export default function StoriesScreen() {
       ) : (
         <StoryList
           testID="story-list"
-          stories={q.stories.map(toSummary)}
+          stories={summaries}
           refreshing={q.refreshing}
           onRefresh={() => void q.refresh()}
           onEndReached={() => {
