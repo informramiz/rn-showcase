@@ -25,35 +25,67 @@ Captured on an iOS Simulator (iPhone, Expo Go): stories, story detail with an ex
 
 ## Architecture
 
+**Feature-based modules, MVVM with hooks:** Views → ViewModel hooks → TanStack Query (server state) / Zustand (client state) → typed API layer.
+
 ```
-app/                    Expo Router routes (thin: wire hooks to components)
-  _layout.tsx           Providers: persisted QueryClient, theme-aware Stack
-  (tabs)/               Stories, Saved, History, Settings
-  story/[id].tsx        Story detail and comments
+ View (Screen component)      renders state, forwards user events
+        │  calls
+        ▼
+ ViewModel hook               use<Screen>ViewModel() → { state, actions }
+        │  composes
+        ├──────────────► TanStack Query hooks   server state: feeds, items, cache, retries
+        │                        │
+        │                        ▼
+        │                 typed API layer       fetch wrapper, ApiError, HN endpoints
+        └──────────────► Zustand stores         client state: bookmarks, history, theme (persisted)
+```
+
+Each screen is a plain component that calls one ViewModel hook and renders what it returns. The ViewModel owns the logic (feed selection, pagination, confirmations, bookmark toggling) and composes query hooks and stores, so it is tested with `renderHook` and no UI. Route files in `app/` only re-export a screen, which keeps navigation separate from features.
+
+### Folder map
+
+```
+app/                          Expo Router routes: thin re-exports of feature screens, plus the two layouts
 src/
-  api/                  fetch wrapper, typed errors, HN endpoints, types
-  hooks/                TanStack Query hooks, comment thread hook, online state
-  store/                Zustand stores: bookmarks, history, settings
-  lib/                  pure helpers: comment tree flattening, formatting, storage
-  components/           StoryRow, StoryList, CommentRow, skeletons, error and offline UI
-  theme/                light and dark palettes, useTheme
-  __tests__/            Jest + React Native Testing Library
-.maestro/               UI smoke flow
+  features/
+    stories/                  StoriesScreen, useStoriesViewModel, useStories (infinite query)
+    story-detail/             StoryDetailScreen, useStoryDetailViewModel, useItem, comment tree
+                              (CommentThread, CommentRow, useCommentThread, comments.ts helpers)
+    bookmarks/                BookmarksScreen, useBookmarksViewModel, Zustand store
+    history/                  HistoryScreen, useHistoryViewModel, Zustand store, useOpenStory
+    settings/                 SettingsScreen, useSettingsViewModel, Zustand store (theme mode)
+  shared/
+    api/                      http client (timeout), ApiError, HN endpoints, types
+    ui/                       Button, Chip, Skeleton, ErrorState, OfflineBanner, StoryList, StoryRow
+    query/                    QueryClient setup, retry policy, AsyncStorage persister
+    theme/                    palettes, spacing, useTheme
+    i18n/                     strings
+    lib/                      storage, formatting
+    hooks/                    useOnline (NetInfo)
+  __tests__/                  shared test helpers and cross-screen tests
+.maestro/                     UI smoke flow
 ```
+
+Feature tests live next to their feature in `__tests__/`. Imports use the `@/` alias for `src/`. Dependencies point one way: features use `shared`, never the reverse (one exception: `shared/theme` reads the theme mode from the settings store). Features import each other only through stores and hooks (for example story detail writes to the bookmarks and history stores). `StoryList` and `StoryRow` sit in `shared/ui` as presentational components because three features render them, and they take the read state and the open handler as props.
 
 ### Data flow
 
-1. A screen calls a hook (`useStories`, `useItem`, `useCommentThread`). Components never call `fetch`.
-2. Hooks call `src/api`, which uses `getJson` (timeout via `AbortController`) and throws `ApiError` with a `kind` (`network`, `timeout`, `http`, `parse`, `not_found`).
+1. A screen calls its ViewModel. Components never call `fetch`.
+2. The ViewModel uses query hooks, which call the API layer. `getJson` adds a timeout via `AbortController` and throws `ApiError` with a `kind` (`network`, `timeout`, `http`, `parse`, `not_found`).
 3. TanStack Query caches results and retries (not for `not_found`). The cache is persisted to AsyncStorage for 24 hours, so a cold start offline still shows the last feed.
 4. NetInfo feeds `onlineManager`, so queries pause offline instead of failing, and resume when the connection returns.
 5. Zustand stores hold user state (bookmarks, history, theme mode) and persist it on their own.
 
-### Why each library
+### Why Zustand and TanStack Query
+
+They hold different kinds of state, so each is used for one job.
+
+- **TanStack Query for server state.** Data that lives on the HN API and can go stale: caching, request de-duplication, retries, cancellation, pagination (`useInfiniteQuery`), offline pause and persistence are solved there, and none of it is hand-written.
+- **Zustand for client state.** Data the user owns (bookmarks, history, theme): tiny stores, no provider, built-in persistence middleware, and tests just call `setState`. It is not mixed with the query cache, so clearing the cache never touches bookmarks.
+
+### Other libraries
 
 - **Expo Router**: file-based routes, typed routes, deep link scheme for free.
-- **TanStack Query**: caching, retries, request cancellation and persistence are solved problems. `useInfiniteQuery` fits the paginated feed.
-- **Zustand**: tiny stores, no provider, easy to test with `setState`.
 - **FlashList**: recycled rows for long feeds.
 - **AsyncStorage**: see decisions below.
 - **Jest, RNTL**: tests run without a device.
@@ -78,9 +110,9 @@ npm run doctor        # expo-doctor
 npx expo export       # bundle sanity check
 ```
 
-Tests mock at the `fetch` boundary and query by role or visible text. They cover the API layer (including payload validation, errors, timeout, batching), `describeError`, the query client (retry policy, cache clearing), the stores, online/offline state and banner, the story screen (loading, error with retry, bookmark toggle), the comment thread (lazy expand, retry), the feed, bookmarks and settings screens (including the remove-all confirmation).
+Tests mock at the `fetch` boundary and query by role or visible text. They cover the API layer (including payload validation, errors, timeout, batching), `describeError`, the query client (retry policy, cache clearing), the stores, online/offline state and banner, every ViewModel hook (`renderHook`), the story screen (loading, error with retry, bookmark toggle), the comment thread (lazy expand, retry), and the feed, bookmarks, history and settings screens (including the remove-all confirmation).
 
-`npm test -- --coverage` currently reports about 90% lines. `jest.config.js` enforces a floor (88% statements and lines, 85% functions, 82% branches), and CI runs with coverage. Not covered: the tab layout and root layout wiring, which the Maestro smoke flow exercises on a device.
+`npm test -- --coverage` currently reports about 95% lines. `jest.config.js` enforces a floor (88% statements and lines, 85% functions, 82% branches), and CI runs with coverage. Not covered: the tab layout and root layout wiring, which the Maestro smoke flow exercises on a device.
 
 `.maestro/smoke.yaml` is a UI flow (launch, scroll, open a story, bookmark it, check the Saved tab). Run it against an installed build with `maestro test .maestro/smoke.yaml`.
 
@@ -108,7 +140,7 @@ The app is configured for EAS (`eas.json`, bundle id `com.codebyramiz.hnreader`)
 
 ## Decisions and trade-offs
 
-- **AsyncStorage, not MMKV.** MMKV is faster and synchronous, but it needs native code, so it does not run in Expo Go. AsyncStorage works in Expo Go and dev clients with no setup. The stored data here is small (bookmarks, history, one cache blob), so speed does not matter. Both plug into Zustand and TanStack persisters, so switching is a small change in `src/lib/storage.ts` and `src/hooks/queryClient.ts`.
+- **AsyncStorage, not MMKV.** MMKV is faster and synchronous, but it needs native code, so it does not run in Expo Go. AsyncStorage works in Expo Go and dev clients with no setup. The stored data here is small (bookmarks, history, one cache blob), so speed does not matter. Both plug into Zustand and TanStack persisters, so switching is a small change in `src/shared/lib/storage.ts` and `src/shared/query/queryClient.ts`.
 - **Feed tabs are chips, not bottom tabs.** Five feeds plus Saved, History and Settings is too many bottom tabs. The feeds are a chip row on the Stories screen, and the bottom bar has four tabs.
 - **Comments load lazily and are collapsed by default.** Some threads have hundreds of comments. Only top-level comments load at first, replies load on expand. The tree is flattened into a row list by a pure function (`flattenThread`), which is why it is easy to test.
 - **Comment text is converted to plain text.** HN comments use a small HTML subset. Links become bare URLs. Rendering real HTML would add a dependency for little gain here.
