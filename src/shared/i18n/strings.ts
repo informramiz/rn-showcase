@@ -58,6 +58,10 @@ export const strings = {
     delete: 'Delete',
     sync: { synced: 'Synced', pending: 'Waiting to sync', failed: 'Sync failed' },
   },
+  alerts: {
+    channelName: 'New comments',
+    title: (count: number) => (count === 1 ? '1 new comment' : `${count} new comments`),
+  },
   offline: 'You are offline. Showing saved data.',
   boot: { failed: 'Could not open the local database.' },
   settings: {
@@ -78,6 +82,12 @@ export const strings = {
     syncNow: 'Sync now',
     retryFailed: 'Retry failed',
     flaky: 'Simulate a flaky network',
+    alerts: 'Comment alerts',
+    alertsHelp:
+      'Get a notification when a saved story gets new comments. Checked in the background about every 15 minutes.',
+    alertStatus: { granted: 'On', denied: 'Off. Turn them on in system settings.', undetermined: 'Off' },
+    enableAlerts: 'Turn on alerts',
+    openSystemSettings: 'Open system settings',
     about: 'About',
     appName: 'HN Reader',
     disclaimer: 'Data from the public Hacker News API. Not affiliated with Y Combinator.',

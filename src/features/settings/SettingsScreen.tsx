@@ -5,12 +5,14 @@ import { strings } from '@/shared/i18n/strings';
 import { spacing, useTheme } from '@/shared/theme';
 import { Button } from '@/shared/ui/Button';
 import { Chip } from '@/shared/ui/Chip';
+import { useCommentAlerts } from './useCommentAlerts';
 import { useSettingsViewModel } from './useSettingsViewModel';
 
 export function SettingsScreen() {
   const { colors } = useTheme();
   const { state, actions } = useSettingsViewModel();
   const sync = useSyncStatus();
+  const alerts = useCommentAlerts();
 
   const section = {
     color: colors.textMuted,
@@ -84,6 +86,27 @@ export function SettingsScreen() {
           <Switch testID="sync-flaky" value={sync.flaky} onValueChange={sync.setFlaky} />
         </View>
       </View>
+
+      {alerts.supported && alerts.permission ? (
+        <View style={{ gap: spacing.sm }}>
+          <Text style={section}>{strings.settings.alerts}</Text>
+          <Text testID="alerts-status" style={{ color: colors.text }}>
+            {strings.settings.alertStatus[alerts.permission]}
+          </Text>
+          <Text style={{ color: colors.textMuted }}>{strings.settings.alertsHelp}</Text>
+          {alerts.permission === 'undetermined' ? (
+            <Button testID="alerts-enable" label={strings.settings.enableAlerts} onPress={alerts.enable} />
+          ) : null}
+          {alerts.permission === 'denied' ? (
+            <Button
+              testID="alerts-settings"
+              variant="surface"
+              label={strings.settings.openSystemSettings}
+              onPress={alerts.openSystemSettings}
+            />
+          ) : null}
+        </View>
+      ) : null}
 
       <View style={{ gap: spacing.sm }}>
         <Text style={section}>{strings.settings.about}</Text>

@@ -5,6 +5,7 @@ import { useIsBookmarked, useToggleBookmark } from '@/features/bookmarks/useBook
 import { useMarkRead } from '@/features/history/useHistory';
 import { toSummary } from '@/shared/api';
 import { hostname } from '@/shared/lib/format';
+import { useServices } from '@/shared/services/AppServices';
 import { htmlToText } from './comments';
 import { useItem } from './useItem';
 
@@ -27,10 +28,16 @@ export function useStoryDetailViewModel() {
   const bookmarked = useIsBookmarked(id);
   const toggleBookmark = useToggleBookmark();
   const markRead = useMarkRead();
+  const { repos } = useServices();
 
   useEffect(() => {
     if (story) markRead(toSummary(story));
   }, [story, markRead]);
+
+  // The user has now seen these comments: only newer ones should trigger an alert.
+  useEffect(() => {
+    if (story && bookmarked) void repos.bookmarks.setKnownDescendants(story.id, story.descendants ?? 0);
+  }, [story, bookmarked, repos]);
 
   return {
     state: {

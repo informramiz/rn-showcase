@@ -61,6 +61,15 @@ describe('useStoryDetailViewModel', () => {
     });
   });
 
+  it('marks the comment count of a saved story as seen', async () => {
+    await services.repos.bookmarks.toggle({ id: 5, title: 'T', descendants: 1 }, 1);
+    mockFetch.mockReturnValue(ok({ ...story, descendants: 4 }));
+    await setup();
+    await waitFor(async () => {
+      expect((await services.repos.bookmarks.list())[0]?.knownDescendants).toBe(4);
+    });
+  });
+
   it('opens the link in the in-app browser', async () => {
     mockFetch.mockReturnValue(ok(story));
     const { result } = await setup();

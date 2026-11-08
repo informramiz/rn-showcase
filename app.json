@@ -30,7 +30,13 @@
         }
       ],
       "expo-sqlite",
-      "expo-background-task"
+      "expo-background-task",
+      [
+        "expo-notifications",
+        {
+          "color": "#d9480f"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
