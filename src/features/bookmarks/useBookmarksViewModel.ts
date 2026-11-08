@@ -1,10 +1,13 @@
+import { useMemo } from 'react';
 import { useOpenStory } from '@/features/history/useOpenStory';
 import { useReadIds } from '@/features/history/useReadIds';
-import { useBookmarks } from './store';
+import { useBookmarkList, useRemoveBookmark } from './useBookmarks';
 
 export function useBookmarksViewModel() {
-  const stories = useBookmarks((s) => s.items);
+  const { data } = useBookmarkList();
+  const stories = useMemo(() => data?.map((b) => b.story) ?? [], [data]);
   const readIds = useReadIds();
   const openStory = useOpenStory();
-  return { state: { stories, readIds }, actions: { openStory } };
+  const remove = useRemoveBookmark();
+  return { state: { stories, readIds }, actions: { openStory, remove } };
 }

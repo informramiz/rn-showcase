@@ -1,21 +1,30 @@
 import * as WebBrowser from 'expo-web-browser';
 import { act, renderHook, waitFor } from '@testing-library/react-native';
-import { useBookmarks } from '@/features/bookmarks/store';
-import { useHistory } from '@/features/history/store';
+import type { AppServices } from '@/shared/services/AppServices';
 import { useStoryDetailViewModel } from '@/features/story-detail/useStoryDetailViewModel';
-import { clientWrapper, httpError, installFetch, mockFetch, ok } from '../../../__tests__/helpers';
+import {
+  clientWrapper,
+  httpError,
+  installFetch,
+  mockFetch,
+  newTestClient,
+  newTestServices,
+  ok,
+} from '../../../__tests__/helpers';
 import { routerMock } from '../../../__tests__/routerMock';
 
 const story = { id: 5, type: 'story', title: 'T', url: 'https://x.dev/a', text: '<p>Hi &amp; bye</p>' };
 
+let services: AppServices;
+
 beforeEach(() => {
   installFetch();
   routerMock.params = { id: '5' };
-  useBookmarks.setState({ items: [] });
-  useHistory.setState({ entries: [] });
+  services = newTestServices();
 });
 
-const setup = () => renderHook(() => useStoryDetailViewModel(), { wrapper: clientWrapper() });
+const setup = () =>
+  renderHook(() => useStoryDetailViewModel(), { wrapper: clientWrapper(newTestClient(), services) });
 
 describe('useStoryDetailViewModel', () => {
   it('loads the story, derives host and body text, and records history', async () => {
@@ -27,7 +36,9 @@ describe('useStoryDetailViewModel', () => {
     });
     expect(result.current.state.host).toBe('x.dev');
     expect(result.current.state.bodyText).toContain('Hi & bye');
-    expect(useHistory.getState().entries.map((e) => e.story.id)).toEqual([5]);
+    await waitFor(async () => {
+      expect((await services.repos.history.list()).map((e) => e.story.id)).toEqual([5]);
+    });
   });
 
   it('toggles the bookmark', async () => {
@@ -39,11 +50,15 @@ describe('useStoryDetailViewModel', () => {
     await act(() => {
       result.current.actions.toggleBookmark();
     });
-    expect(result.current.state.bookmarked).toBe(true);
+    await waitFor(() => {
+      expect(result.current.state.bookmarked).toBe(true);
+    });
     await act(() => {
       result.current.actions.toggleBookmark();
     });
-    expect(result.current.state.bookmarked).toBe(false);
+    await waitFor(() => {
+      expect(result.current.state.bookmarked).toBe(false);
+    });
   });
 
   it('opens the link in the in-app browser', async () => {
@@ -103,6 +118,6 @@ describe('useStoryDetailViewModel', () => {
       result.current.actions.toggleBookmark();
       result.current.actions.openLink();
     });
-    expect(useBookmarks.getState().items).toEqual([]);
+    expect(await services.repos.bookmarks.list()).toEqual([]);
   });
 });

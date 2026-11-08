@@ -1,6 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { useStoriesViewModel } from '@/features/stories/useStoriesViewModel';
-import { useHistory } from '@/features/history/store';
 import { clientWrapper, installFetch, itemIdFromUrl, mockFetch, ok } from '../../../__tests__/helpers';
 import { routerMock } from '../../../__tests__/routerMock';
 
@@ -9,7 +8,6 @@ const ids = Array.from({ length: 40 }, (_, i) => i + 1);
 beforeEach(() => {
   installFetch();
   routerMock.push.mockReset();
-  useHistory.setState({ entries: [] });
   mockFetch.mockImplementation((url) => {
     if (url.includes('topstories')) return ok(ids);
     if (url.includes('newstories')) return ok([100]);
@@ -94,6 +92,8 @@ describe('useStoriesViewModel', () => {
       result.current.actions.openStory(story);
     });
     expect(routerMock.push).toHaveBeenCalledWith({ pathname: '/story/[id]', params: { id: '1' } });
-    expect(result.current.state.readIds.has(1)).toBe(true);
+    await waitFor(() => {
+      expect(result.current.state.readIds.has(1)).toBe(true);
+    });
   });
 });

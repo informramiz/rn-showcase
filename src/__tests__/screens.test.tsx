@@ -1,19 +1,31 @@
+import type { ReactElement } from 'react';
 import { Alert, Platform } from 'react-native';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 import BookmarksScreen from '../../app/(tabs)/bookmarks';
 import StoriesScreen from '../../app/(tabs)';
 import HistoryScreen from '../../app/(tabs)/history';
 import SettingsScreen from '../../app/(tabs)/settings';
-import { useBookmarks } from '@/features/bookmarks/store';
-import { useHistory } from '@/features/history/store';
 import { useSettings } from '@/features/settings/store';
-import { installFetch, itemIdFromUrl, mockFetch, ok, renderWithClient } from './helpers';
+import type { AppServices } from '@/shared/services/AppServices';
+import {
+  installFetch,
+  itemIdFromUrl,
+  mockFetch,
+  newTestClient,
+  newTestServices,
+  ok,
+  renderWithClient,
+} from './helpers';
 import { routerMock } from './routerMock';
+
+let services: AppServices;
+const renderScreen = (ui: ReactElement) => renderWithClient(ui, newTestClient(), services);
+const bookmarkCount = async () => (await services.repos.bookmarks.list()).length;
 
 beforeEach(() => {
   installFetch();
   routerMock.push.mockReset();
-  useBookmarks.setState({ items: [] });
+  services = newTestServices();
 });
 
 describe('StoriesScreen', () => {
@@ -23,7 +35,7 @@ describe('StoriesScreen', () => {
       const id = itemIdFromUrl(url);
       return ok({ id, title: `Story ${id}`, by: 'pg', score: 5, time: 1, type: 'story' });
     });
-    await renderWithClient(<StoriesScreen />);
+    await renderScreen(<StoriesScreen />);
     expect(screen.getByTestId('story-skeleton')).toBeTruthy();
     expect(await screen.findByText('Story 11')).toBeTruthy();
     await fireEvent.press(screen.getByText('Story 11'));
@@ -32,7 +44,7 @@ describe('StoriesScreen', () => {
 
   it('shows an error state and recovers on retry', async () => {
     mockFetch.mockRejectedValue(new TypeError('down'));
-    await renderWithClient(<StoriesScreen />);
+    await renderScreen(<StoriesScreen />);
     expect(await screen.findByText('Could not load')).toBeTruthy();
     mockFetch.mockImplementation((url) => {
       if (url.includes('topstories')) return ok([1]);
@@ -47,31 +59,30 @@ describe('StoriesScreen', () => {
 
 describe('BookmarksScreen', () => {
   it('shows empty state, then saved stories', async () => {
-    await renderWithClient(<BookmarksScreen />);
-    expect(screen.getByText('No bookmarks yet')).toBeTruthy();
+    await renderScreen(<BookmarksScreen />);
+    expect(await screen.findByText('No bookmarks yet')).toBeTruthy();
     await screen.unmount();
-    useBookmarks.setState({ items: [{ id: 7, title: 'Saved one' }] });
-    await renderWithClient(<BookmarksScreen />);
-    expect(screen.getByText('Saved one')).toBeTruthy();
+    await services.repos.bookmarks.toggle({ id: 7, title: 'Saved one' }, 1);
+    await renderScreen(<BookmarksScreen />);
+    expect(await screen.findByText('Saved one')).toBeTruthy();
   });
 });
 
 describe('HistoryScreen', () => {
   it('shows empty state, then read stories', async () => {
-    useHistory.setState({ entries: [] });
-    await renderWithClient(<HistoryScreen />);
-    expect(screen.getByText('Nothing read yet')).toBeTruthy();
+    await renderScreen(<HistoryScreen />);
+    expect(await screen.findByText('Nothing read yet')).toBeTruthy();
     await screen.unmount();
-    useHistory.setState({ entries: [{ story: { id: 3, title: 'Read one' }, readAt: 1 }] });
-    await renderWithClient(<HistoryScreen />);
-    expect(screen.getByText('Read one')).toBeTruthy();
+    await services.repos.history.markRead({ id: 3, title: 'Read one' }, 1);
+    await renderScreen(<HistoryScreen />);
+    expect(await screen.findByText('Read one')).toBeTruthy();
   });
 });
 
 describe('SettingsScreen', () => {
   it('changes the theme override', async () => {
     useSettings.setState({ themeMode: 'system' });
-    await renderWithClient(<SettingsScreen />);
+    await renderScreen(<SettingsScreen />);
     await fireEvent.press(screen.getByRole('radio', { name: 'Dark' }));
     expect(useSettings.getState().themeMode).toBe('dark');
   });
@@ -86,32 +97,36 @@ describe('SettingsScreen', () => {
 
     it('asks first on native and only removes after confirming', async () => {
       const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
-      useBookmarks.setState({ items: [{ id: 1, title: 'Keep me' }] });
-      await renderWithClient(<SettingsScreen />);
+      await services.repos.bookmarks.toggle({ id: 1, title: 'Keep me' }, 1);
+      await renderScreen(<SettingsScreen />);
       await press();
-      expect(useBookmarks.getState().items).toHaveLength(1);
+      expect(await bookmarkCount()).toBe(1);
       const buttons = alert.mock.calls[0]?.[2];
       await act(() => {
         buttons?.find((b) => b.text === 'Cancel')?.onPress?.();
       });
-      expect(useBookmarks.getState().items).toHaveLength(1);
+      expect(await bookmarkCount()).toBe(1);
       await act(() => {
         buttons?.find((b) => b.text === 'Remove')?.onPress?.();
       });
-      expect(useBookmarks.getState().items).toHaveLength(0);
+      await waitFor(async () => {
+        expect(await bookmarkCount()).toBe(0);
+      });
     });
 
     it('uses window.confirm on web', async () => {
       Platform.OS = 'web';
       const confirm = jest.fn().mockReturnValueOnce(false).mockReturnValueOnce(true);
       Object.assign(globalThis, { window: { confirm } });
-      useBookmarks.setState({ items: [{ id: 1, title: 'Keep me' }] });
-      await renderWithClient(<SettingsScreen />);
+      await services.repos.bookmarks.toggle({ id: 1, title: 'Keep me' }, 1);
+      await renderScreen(<SettingsScreen />);
       await press();
-      expect(useBookmarks.getState().items).toHaveLength(1);
+      expect(await bookmarkCount()).toBe(1);
       await press();
       expect(confirm).toHaveBeenCalledTimes(2);
-      expect(useBookmarks.getState().items).toHaveLength(0);
+      await waitFor(async () => {
+        expect(await bookmarkCount()).toBe(0);
+      });
     });
   });
 });

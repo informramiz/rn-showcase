@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useQueryClient, type InfiniteData } from '@tanstack/react-query';
 import { useCallback, useMemo, useState } from 'react';
-import { fetchStoryIds, fetchStoryPage, PAGE_SIZE, type FeedKind, type HNItem } from '@/shared/api';
+import { PAGE_SIZE, type FeedKind, type HNItem } from '@/shared/api';
+import { useServices } from '@/shared/services/AppServices';
 
 export interface StoryPage {
   items: HNItem[];
@@ -12,6 +13,7 @@ export const idsKey = (feed: FeedKind) => ['ids', feed] as const;
 
 export function useStories(feed: FeedKind) {
   const client = useQueryClient();
+  const { hn } = useServices();
   const [refreshing, setRefreshing] = useState(false);
 
   const query = useInfiniteQuery({
@@ -20,10 +22,10 @@ export function useStories(feed: FeedKind) {
     queryFn: async ({ pageParam, signal }): Promise<StoryPage> => {
       const ids = await client.query({
         queryKey: idsKey(feed),
-        queryFn: ({ signal: s }) => fetchStoryIds(feed, s),
+        queryFn: ({ signal: s }) => hn.storyIds(feed, s),
         staleTime: 60_000,
       });
-      const items = await fetchStoryPage(ids, pageParam, signal);
+      const items = await hn.storyPage(ids, pageParam, signal);
       const next = pageParam + PAGE_SIZE;
       return { items, nextOffset: next < ids.length ? next : null };
     },

@@ -1,8 +1,8 @@
 import { useLocalSearchParams } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect } from 'react';
-import { useBookmarks } from '@/features/bookmarks/store';
-import { useHistory } from '@/features/history/store';
+import { useIsBookmarked, useToggleBookmark } from '@/features/bookmarks/useBookmarks';
+import { useMarkRead } from '@/features/history/useHistory';
 import { toSummary } from '@/shared/api';
 import { hostname } from '@/shared/lib/format';
 import { htmlToText } from './comments';
@@ -19,14 +19,14 @@ export function isWebUrl(url: string | undefined): url is string {
   }
 }
 
-/** Story detail: the item query (server state) plus bookmark and history stores (client state). */
+/** Story detail: the item query (server state) plus bookmark and history in the local store. */
 export function useStoryDetailViewModel() {
   const { id: idParam } = useLocalSearchParams<{ id: string }>();
   const id = Number(idParam);
   const { data: story, isPending, error, refetch } = useItem(id);
-  const bookmarked = useBookmarks((s) => s.items.some((i) => i.id === id));
-  const toggleBookmark = useBookmarks((s) => s.toggle);
-  const markRead = useHistory((s) => s.markRead);
+  const bookmarked = useIsBookmarked(id);
+  const toggleBookmark = useToggleBookmark();
+  const markRead = useMarkRead();
 
   useEffect(() => {
     if (story) markRead(toSummary(story));

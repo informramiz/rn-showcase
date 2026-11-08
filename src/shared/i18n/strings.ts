@@ -38,6 +38,7 @@ export const strings = {
     parse: 'The server sent an unexpected response.',
   },
   offline: 'You are offline. Showing saved data.',
+  boot: { failed: 'Could not open the local database.' },
   settings: {
     theme: 'Theme',
     themeModes: { system: 'System', light: 'Light', dark: 'Dark' },
