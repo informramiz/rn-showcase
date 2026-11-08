@@ -28,7 +28,9 @@
           "backgroundColor": "#d9480f",
           "imageWidth": 200
         }
-      ]
+      ],
+      "expo-sqlite",
+      "expo-background-task"
     ],
     "experiments": {
       "typedRoutes": true,

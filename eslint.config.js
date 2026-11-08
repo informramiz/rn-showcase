@@ -19,5 +19,5 @@ module.exports = [
   },
   { files: ['**/*.js'], ...tseslint.configs.disableTypeChecked },
   prettier,
-  { ignores: ['dist/*', '.expo/*', 'node_modules/*', 'coverage/*'] },
+  { ignores: ['dist/*', '.expo/*', 'node_modules/*', 'coverage/*', 'drizzle/*', 'ios/*', 'android/*'] },
 ];
