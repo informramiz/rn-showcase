@@ -1,5 +1,6 @@
 import { Stack } from 'expo-router';
 import { ScrollView, Text, View } from 'react-native';
+import { NotesSection } from '@/features/notes/NotesSection';
 import { strings } from '@/shared/i18n/strings';
 import { timeAgo } from '@/shared/lib/format';
 import { useTheme } from '@/shared/theme';
@@ -43,6 +44,16 @@ export function StoryDetailScreen() {
           />
         </View>
       </View>
+      {state.bookmarked ? (
+        <NotesSection storyId={story.id} />
+      ) : (
+        <Text
+          testID="notes-saved-only"
+          style={{ color: colors.textMuted, paddingHorizontal: 16, paddingTop: 12 }}
+        >
+          {strings.notes.savedOnly}
+        </Text>
+      )}
       {story.kids?.length ? (
         <CommentThread rootIds={story.kids} />
       ) : (

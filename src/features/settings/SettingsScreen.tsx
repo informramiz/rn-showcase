@@ -1,5 +1,6 @@
 import Constants from 'expo-constants';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, Switch, Text, View } from 'react-native';
+import { useSyncStatus } from '@/features/sync/useSyncStatus';
 import { strings } from '@/shared/i18n/strings';
 import { spacing, useTheme } from '@/shared/theme';
 import { Button } from '@/shared/ui/Button';
@@ -9,6 +10,7 @@ import { useSettingsViewModel } from './useSettingsViewModel';
 export function SettingsScreen() {
   const { colors } = useTheme();
   const { state, actions } = useSettingsViewModel();
+  const sync = useSyncStatus();
 
   const section = {
     color: colors.textMuted,
@@ -51,6 +53,36 @@ export function SettingsScreen() {
           label={strings.settings.removeBookmarks}
           onPress={actions.confirmClearBookmarks}
         />
+      </View>
+
+      <View style={{ gap: spacing.sm }}>
+        <Text style={section}>{strings.settings.sync}</Text>
+        <Text testID="sync-status" style={{ color: colors.text }}>
+          {strings.settings.syncStatus(sync.status.pending, sync.status.failed)}
+        </Text>
+        <Text style={{ color: colors.textMuted }}>{strings.settings.syncHelp}</Text>
+        <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+          <Button
+            testID="sync-now"
+            variant="surface"
+            grow
+            label={strings.settings.syncNow}
+            onPress={sync.syncNow}
+          />
+          {sync.status.failed > 0 ? (
+            <Button
+              testID="sync-retry"
+              variant="outline"
+              grow
+              label={strings.settings.retryFailed}
+              onPress={sync.retryFailed}
+            />
+          ) : null}
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Text style={{ color: colors.text }}>{strings.settings.flaky}</Text>
+          <Switch testID="sync-flaky" value={sync.flaky} onValueChange={sync.setFlaky} />
+        </View>
       </View>
 
       <View style={{ gap: spacing.sm }}>

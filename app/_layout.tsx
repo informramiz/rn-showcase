@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
+import { SyncBridge } from '@/features/sync/SyncBridge';
 import { useOnlineManagerSync } from '@/shared/hooks/useOnline';
 import { strings } from '@/shared/i18n/strings';
 import { createQueryClient } from '@/shared/query/queryClient';
@@ -44,6 +45,7 @@ export default function RootLayout() {
   return (
     <ServicesProvider services={boot.services}>
       <QueryClientProvider client={client}>
+        <SyncBridge />
         <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
         <Stack
           screenOptions={{

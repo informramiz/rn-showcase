@@ -32,7 +32,12 @@ export function newTestClient(): QueryClient {
 /** Real services over the in-memory store, with a fixed clock that ticks on each call. */
 export function newTestServices(start = 1_000): AppServices {
   let t = start;
-  return createServices(createMemoryRepositories(), () => (t += 1));
+  return createServices(createMemoryRepositories(), {
+    now: () => (t += 1),
+    random: () => 0.5,
+    // No real timers in UI tests: backoff wake-ups are covered by the engine tests.
+    schedule: () => () => undefined,
+  });
 }
 
 function Providers({

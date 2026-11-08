@@ -1,6 +1,8 @@
 import { createContext, useContext, type ReactNode } from 'react';
 import type { HnSource } from '@/shared/data/hnSource';
 import type { Repositories } from '@/shared/data/ports';
+import type { NetworkSimulator } from '@/shared/sync/fakeRemote';
+import type { SyncEngine } from '@/shared/sync/syncEngine';
 
 /**
  * Everything features need from outside React, created once in the
@@ -11,6 +13,9 @@ export interface AppServices {
   repos: Repositories;
   hn: HnSource;
   now: () => number;
+  sync: SyncEngine;
+  /** Demo control for the fake notes server (HN has no write API). */
+  network: NetworkSimulator;
 }
 
 const ServicesContext = createContext<AppServices | null>(null);
