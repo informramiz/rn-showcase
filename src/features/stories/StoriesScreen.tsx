@@ -47,6 +47,7 @@ export function StoriesScreen() {
           onEndReached={actions.loadMore}
           loadingMore={state.loadingMore}
           emptyTitle={strings.list.noStories}
+          swipe={state.swipe}
         />
       )}
     </View>

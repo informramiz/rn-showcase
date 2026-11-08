@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { registerBackgroundRefresh } from '@/features/background/backgroundTask';
 import { SyncBridge } from '@/features/sync/SyncBridge';
 import { useOnlineManagerSync } from '@/shared/hooks/useOnline';
@@ -55,24 +56,26 @@ export default function RootLayout() {
   }
 
   return (
-    <ServicesProvider services={boot.services}>
-      <QueryClientProvider client={client}>
-        <SyncBridge />
-        <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-        <Stack
-          screenOptions={{
-            headerStyle: { backgroundColor: colors.surface },
-            headerTintColor: colors.text,
-            contentStyle: { backgroundColor: colors.background },
-          }}
-        >
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="story/[id]"
-            options={{ title: strings.story.screenTitle, headerBackTitle: strings.story.backTitle }}
-          />
-        </Stack>
-      </QueryClientProvider>
-    </ServicesProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ServicesProvider services={boot.services}>
+        <QueryClientProvider client={client}>
+          <SyncBridge />
+          <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+          <Stack
+            screenOptions={{
+              headerStyle: { backgroundColor: colors.surface },
+              headerTintColor: colors.text,
+              contentStyle: { backgroundColor: colors.background },
+            }}
+          >
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="story/[id]"
+              options={{ title: strings.story.screenTitle, headerBackTitle: strings.story.backTitle }}
+            />
+          </Stack>
+        </QueryClientProvider>
+      </ServicesProvider>
+    </GestureHandlerRootView>
   );
 }

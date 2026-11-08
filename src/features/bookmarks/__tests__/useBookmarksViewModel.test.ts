@@ -31,16 +31,23 @@ describe('useBookmarksViewModel', () => {
     });
   });
 
-  it('removes a bookmark', async () => {
+  it('removes a bookmark, also by swiping it away', async () => {
     const { result } = await setup();
     await waitFor(() => {
       expect(result.current.state.stories).toHaveLength(2);
+    });
+    expect(result.current.state.swipe.onBookmark).toBeUndefined();
+    await act(() => {
+      result.current.state.swipe.onDismiss?.(b);
+    });
+    await waitFor(() => {
+      expect(result.current.state.stories.map((s) => s.id)).toEqual([1]);
     });
     await act(() => {
       result.current.actions.remove(1);
     });
     await waitFor(() => {
-      expect(result.current.state.stories.map((s) => s.id)).toEqual([2]);
+      expect(result.current.state.stories).toEqual([]);
     });
   });
 

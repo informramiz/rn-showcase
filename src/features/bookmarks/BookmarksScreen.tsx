@@ -14,6 +14,7 @@ export function BookmarksScreen() {
         onOpen={actions.openStory}
         emptyTitle={strings.list.noBookmarks}
         emptyHint={strings.list.noBookmarksHint}
+        swipe={state.swipe}
       />
     </View>
   );

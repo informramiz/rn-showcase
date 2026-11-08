@@ -1,6 +1,14 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { useStoriesViewModel } from '@/features/stories/useStoriesViewModel';
-import { clientWrapper, installFetch, itemIdFromUrl, mockFetch, ok } from '../../../__tests__/helpers';
+import {
+  clientWrapper,
+  installFetch,
+  itemIdFromUrl,
+  mockFetch,
+  newTestClient,
+  newTestServices,
+  ok,
+} from '../../../__tests__/helpers';
 import { routerMock } from '../../../__tests__/routerMock';
 
 const ids = Array.from({ length: 40 }, (_, i) => i + 1);
@@ -95,5 +103,35 @@ describe('useStoriesViewModel', () => {
     await waitFor(() => {
       expect(result.current.state.readIds.has(1)).toBe(true);
     });
+  });
+
+  it('swipes to save and hides dismissed stories', async () => {
+    const services = newTestServices();
+    const { result } = await renderHook(() => useStoriesViewModel(), {
+      wrapper: clientWrapper(newTestClient(), services),
+    });
+    await waitFor(() => {
+      expect(result.current.state.stories.length).toBeGreaterThan(0);
+    });
+    const [first, second] = result.current.state.stories;
+    if (!first || !second) throw new Error('expected stories');
+    const swipe = result.current.state.swipe;
+    expect(swipe.bookmarkLabel?.(first)).toBe('Save');
+
+    await act(() => {
+      swipe.onBookmark?.(first);
+    });
+    await waitFor(() => {
+      expect(result.current.state.swipe.bookmarkLabel?.(first)).toBe('Unsave');
+    });
+    expect((await services.repos.bookmarks.list()).map((b) => b.story.id)).toEqual([first.id]);
+
+    await act(() => {
+      result.current.state.swipe.onDismiss?.(second);
+    });
+    await waitFor(() => {
+      expect(result.current.state.stories.map((s) => s.id)).not.toContain(second.id);
+    });
+    expect(await services.repos.dismissed.list()).toEqual([second.id]);
   });
 });

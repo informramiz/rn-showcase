@@ -17,9 +17,16 @@ export const strings = {
   list: {
     noStories: 'No stories',
     noBookmarks: 'No bookmarks yet',
-    noBookmarksHint: 'Open a story and tap Save. Saved stories stay available offline.',
+    noBookmarksHint:
+      'Open a story and tap Save, or swipe a story right. Saved stories stay available offline.',
     nothingRead: 'Nothing read yet',
     nothingReadHint: 'Stories you open show up here.',
+  },
+  swipe: {
+    save: 'Save',
+    unsave: 'Unsave',
+    dismiss: 'Hide',
+    remove: 'Remove',
   },
   comment: {
     loading: 'Loading comment…',

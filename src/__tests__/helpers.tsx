@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react-native';
 import type { ReactElement, ReactNode } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { createMemoryRepositories } from '@/shared/data/memory/repositories';
 import { ServicesProvider, type AppServices } from '@/shared/services/AppServices';
 import { createServices } from '@/shared/services/createAppServices';
@@ -50,9 +51,11 @@ function Providers({
   children: ReactNode;
 }) {
   return (
-    <ServicesProvider services={services}>
-      <QueryClientProvider client={client}>{children}</QueryClientProvider>
-    </ServicesProvider>
+    <GestureHandlerRootView>
+      <ServicesProvider services={services}>
+        <QueryClientProvider client={client}>{children}</QueryClientProvider>
+      </ServicesProvider>
+    </GestureHandlerRootView>
   );
 }
 

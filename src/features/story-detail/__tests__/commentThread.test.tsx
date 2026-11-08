@@ -32,9 +32,12 @@ describe('CommentThread', () => {
     expect(await screen.findByText('child three')).toBeTruthy();
     expect(fetchedIds().sort()).toEqual([1, 2, 3, 4]);
     expect(screen.getByText('Tap to collapse')).toBeTruthy();
+    // Replies sit in an animated container that fades in and out.
+    expect(screen.getByTestId('replies-1')).toBeTruthy();
 
     await fireEvent.press(screen.getByText('root one'));
     expect(screen.queryByText('child three')).toBeNull();
+    expect(screen.queryByTestId('replies-1')).toBeNull();
     expect(screen.getByText('2 replies, tap to expand')).toBeTruthy();
   });
 

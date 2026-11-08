@@ -5,6 +5,7 @@ import type { StorySummary } from '@/shared/api';
 import { useTheme } from '@/shared/theme';
 import { EmptyState } from './ErrorState';
 import { StoryRow } from './StoryRow';
+import { SwipeableStoryRow, type SwipeActions } from './SwipeableStoryRow';
 
 interface Props {
   stories: StorySummary[];
@@ -18,6 +19,8 @@ interface Props {
   emptyTitle?: string;
   emptyHint?: string;
   testID?: string;
+  /** Enables swipe-to-bookmark / swipe-to-dismiss rows. */
+  swipe?: SwipeActions;
 }
 
 const keyExtractor = (s: StorySummary) => String(s.id);
@@ -33,13 +36,21 @@ export function StoryList({
   emptyTitle,
   emptyHint,
   testID,
+  swipe,
 }: Props) {
   const { colors } = useTheme();
   const renderItem = useCallback(
-    ({ item, index }: ListRenderItemInfo<StorySummary>) => (
-      <StoryRow story={item} index={index} read={readIds.has(item.id)} onPress={onOpen} />
-    ),
-    [readIds, onOpen],
+    ({ item, index }: ListRenderItemInfo<StorySummary>) => {
+      const row = <StoryRow story={item} index={index} read={readIds.has(item.id)} onPress={onOpen} />;
+      return swipe ? (
+        <SwipeableStoryRow story={item} actions={swipe}>
+          {row}
+        </SwipeableStoryRow>
+      ) : (
+        row
+      );
+    },
+    [readIds, onOpen, swipe],
   );
 
   return (

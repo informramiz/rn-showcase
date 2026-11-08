@@ -1,5 +1,8 @@
 module.exports = {
   preset: 'jest-expo',
+  // Reanimated's resolver loads its web implementation in Jest (official testing guide).
+  resolver: 'react-native-reanimated/jest/resolver',
+  setupFiles: ['react-native-gesture-handler/jestSetup.js'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleNameMapper: { '^@/(.*)$': '<rootDir>/src/$1' },
   testMatch: ['<rootDir>/src/**/__tests__/**/*.test.{ts,tsx}'],

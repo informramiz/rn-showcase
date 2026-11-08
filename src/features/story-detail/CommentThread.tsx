@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { View } from 'react-native';
+import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { useCommentThread } from './useCommentThread';
 import { useItem } from './useItem';
 import { CommentRow } from './CommentRow';
@@ -30,10 +30,18 @@ function CommentNode({ id, depth, expanded, onToggle }: NodeProps) {
         onToggle={onToggle}
         onRetry={retry}
       />
-      {isExpanded &&
-        kids.map((kid) => (
-          <CommentNode key={kid} id={kid} depth={depth + 1} expanded={expanded} onToggle={onToggle} />
-        ))}
+      {isExpanded && kids.length > 0 ? (
+        <Animated.View
+          testID={`replies-${String(id)}`}
+          entering={FadeIn.duration(200)}
+          exiting={FadeOut.duration(150)}
+          layout={LinearTransition.duration(200)}
+        >
+          {kids.map((kid) => (
+            <CommentNode key={kid} id={kid} depth={depth + 1} expanded={expanded} onToggle={onToggle} />
+          ))}
+        </Animated.View>
+      ) : null}
     </>
   );
 }
@@ -42,10 +50,10 @@ function CommentNode({ id, depth, expanded, onToggle }: NodeProps) {
 export function CommentThread({ rootIds }: { rootIds: readonly number[] }) {
   const { expanded, toggle } = useCommentThread();
   return (
-    <View testID="comment-thread">
+    <Animated.View testID="comment-thread" layout={LinearTransition.duration(200)}>
       {rootIds.map((id) => (
         <CommentNode key={id} id={id} depth={0} expanded={expanded} onToggle={toggle} />
       ))}
-    </View>
+    </Animated.View>
   );
 }
