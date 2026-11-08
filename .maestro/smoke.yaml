@@ -24,6 +24,18 @@ appId: com.codebyramiz.hnreader
 - tapOn:
     id: bookmark-button
 - assertVisible: Saved
+# Saved stories take notes; they go to the outbox and sync in the background.
+- scrollUntilVisible:
+    element:
+      id: note-body-input
+    direction: DOWN
+- tapOn:
+    id: note-body-input
+- inputText: Smoke note
+- hideKeyboard
+- tapOn:
+    id: note-save
+- assertVisible: Smoke note
 # Maestro's `back` is a no-op on iOS, so tap the native header back button there.
 - runFlow:
     when:
@@ -36,9 +48,20 @@ appId: com.codebyramiz.hnreader
       platform: Android
     commands:
       - back
+# Swipe right on a row to save it without opening the story.
+- swipe:
+    from:
+      id: story-item-1
+    direction: RIGHT
 - tapOn:
     id: tab-bookmarks
 # The bookmarks screen has its own list id and must not show the empty state.
 - assertVisible:
     id: bookmarks-list
 - assertNotVisible: No bookmarks yet
+# Deep link straight into a story (item 1 is the first HN story, it never goes away).
+- openLink: hnreader://story/1
+- extendedWaitUntil:
+    visible:
+      id: story-detail
+    timeout: 20000
