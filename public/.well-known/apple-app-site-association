@@ -1,0 +1,10 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["APPLE_TEAM_ID.com.codebyramiz.hnreader"],
+        "components": [{ "/": "/story/*", "comment": "Opens a story in the app" }]
+      }
+    ]
+  }
+}

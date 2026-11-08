@@ -10,6 +10,7 @@ export const strings = {
     saved: 'Saved',
     noComments: 'No comments yet.',
     untitled: '(untitled)',
+    invalidLink: 'That link does not point to a story.',
     unknownAuthor: 'unknown',
     points: (n: number) => `${n} pts`,
     comments: (n: number) => `${n} comments`,

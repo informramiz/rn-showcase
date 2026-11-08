@@ -9,14 +9,29 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "bundleIdentifier": "com.codebyramiz.hnreader",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "associatedDomains": ["applinks:hnreader.codebyramiz.com"]
     },
     "android": {
       "package": "com.codebyramiz.hnreader",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#d9480f"
-      }
+      },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "hnreader.codebyramiz.com",
+              "pathPrefix": "/story"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "plugins": [
       "expo-router",

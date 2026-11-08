@@ -1,4 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
+import { parseStoryId } from '@/shared/lib/storyLink';
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect } from 'react';
 import { useIsBookmarked, useToggleBookmark } from '@/features/bookmarks/useBookmarks';
@@ -23,9 +24,9 @@ export function isWebUrl(url: string | undefined): url is string {
 /** Story detail: the item query (server state) plus bookmark and history in the local store. */
 export function useStoryDetailViewModel() {
   const { id: idParam } = useLocalSearchParams<{ id: string }>();
-  const id = Number(idParam);
+  const id = parseStoryId(idParam);
   const { data: story, isPending, error, refetch } = useItem(id);
-  const bookmarked = useIsBookmarked(id);
+  const bookmarked = useIsBookmarked(id ?? -1);
   const toggleBookmark = useToggleBookmark();
   const markRead = useMarkRead();
   const { repos } = useServices();
@@ -42,7 +43,8 @@ export function useStoryDetailViewModel() {
   return {
     state: {
       story,
-      isPending,
+      invalidLink: id === undefined,
+      isPending: id !== undefined && isPending,
       error,
       bookmarked,
       canOpenLink: isWebUrl(story?.url),

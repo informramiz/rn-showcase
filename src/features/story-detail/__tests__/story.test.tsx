@@ -33,6 +33,13 @@ beforeEach(() => {
 });
 
 describe('StoryDetailScreen', () => {
+  it('rejects a deep link that does not carry a story id without fetching', async () => {
+    routerMock.params = { id: 'not-a-number' };
+    await renderScreen();
+    expect(screen.getByText('That link does not point to a story.')).toBeTruthy();
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
   it('shows a placeholder while loading, then the story, and records it in history', async () => {
     let resolve: (v: unknown) => void = () => undefined;
     mockFetch.mockReturnValue(

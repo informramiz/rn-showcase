@@ -5,7 +5,7 @@ import { strings } from '@/shared/i18n/strings';
 import { timeAgo } from '@/shared/lib/format';
 import { useTheme } from '@/shared/theme';
 import { Button } from '@/shared/ui/Button';
-import { ErrorState } from '@/shared/ui/ErrorState';
+import { EmptyState, ErrorState } from '@/shared/ui/ErrorState';
 import { StoryRowSkeleton } from '@/shared/ui/Skeleton';
 import { CommentThread } from './CommentThread';
 import { useStoryDetailViewModel } from './useStoryDetailViewModel';
@@ -15,6 +15,7 @@ export function StoryDetailScreen() {
   const { state, actions } = useStoryDetailViewModel();
   const { story } = state;
 
+  if (state.invalidLink) return <EmptyState title={strings.story.invalidLink} />;
   if (state.isPending) return <StoryRowSkeleton />;
   if (state.error || !story) return <ErrorState error={state.error} onRetry={actions.retry} />;
 
