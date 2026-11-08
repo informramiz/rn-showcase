@@ -22,7 +22,10 @@ export const itemIdFromUrl = (url: string): number => Number(/item\/(\d+)/.exec(
 
 export function newTestClient(): QueryClient {
   return new QueryClient({
-    defaultOptions: { queries: { retry: false, gcTime: Infinity, networkMode: 'offlineFirst' } },
+    defaultOptions: {
+      queries: { retry: false, gcTime: Infinity, networkMode: 'offlineFirst' },
+      mutations: { gcTime: Infinity },
+    },
   });
 }
 

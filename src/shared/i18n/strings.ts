@@ -1,6 +1,6 @@
 /** Every user-facing string lives here. A plain typed object, no i18n library. */
 export const strings = {
-  tabs: { stories: 'Stories', saved: 'Saved', history: 'History', settings: 'Settings' },
+  tabs: { stories: 'Stories', search: 'Search', saved: 'Saved', history: 'History', settings: 'Settings' },
   feeds: { top: 'Top', new: 'New', best: 'Best', ask: 'Ask', show: 'Show' },
   story: {
     screenTitle: 'Story',
@@ -36,6 +36,13 @@ export const strings = {
     http: (status: number | undefined) => `The server returned an error (${status ?? 'unknown'}).`,
     not_found: 'This item no longer exists.',
     parse: 'The server sent an unexpected response.',
+  },
+  search: {
+    placeholder: 'Search stories on this device',
+    scopes: { all: 'All cached', saved: 'Saved' },
+    prompt: 'Search offline',
+    hint: 'Matches titles and text of every story you have loaded or saved.',
+    noResults: 'No matching stories',
   },
   offline: 'You are offline. Showing saved data.',
   boot: { failed: 'Could not open the local database.' },
