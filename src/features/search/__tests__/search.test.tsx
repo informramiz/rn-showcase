@@ -25,6 +25,24 @@ describe('useSearchViewModel', () => {
   const setup = () =>
     renderHook(() => useSearchViewModel(), { wrapper: clientWrapper(newTestClient(), services) });
 
+  it('sees stories cached after an earlier identical search', async () => {
+    const client = newTestClient();
+    const wrapper = clientWrapper(client, services);
+    const first = await renderHook(() => useSearchViewModel(), { wrapper });
+    await act(() => {
+      first.result.current.actions.setQuery('rust');
+    });
+    await waitFor(() => expect(first.result.current.state.results).toHaveLength(2));
+    await first.unmount();
+
+    await services.repos.cache.putItems([{ id: 9, type: 'story', title: 'Rust async' }], 5);
+    const second = await renderHook(() => useSearchViewModel(), { wrapper });
+    await act(() => {
+      second.result.current.actions.setQuery('rust');
+    });
+    await waitFor(() => expect(second.result.current.state.results).toHaveLength(3));
+  });
+
   it('finds nothing without a query', async () => {
     const { result } = await setup();
     expect(result.current.state.hasQuery).toBe(false);

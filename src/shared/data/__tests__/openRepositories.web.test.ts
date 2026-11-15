@@ -22,6 +22,21 @@ it('persists writes after a short delay and restores them on the next open', asy
   expect(await reopened.dismissed.list()).toEqual([2]);
 });
 
+it('keeps legacy keys when the imported data cannot be stored, then imports again', async () => {
+  const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+  const legacy = JSON.stringify({ state: { items: [{ id: 5, title: 'Old' }] } });
+  await AsyncStorage.setItem('bookmarks', legacy);
+  jest.spyOn(AsyncStorage, 'setItem').mockRejectedValueOnce(new Error('quota'));
+  await expect(openRepositories()).rejects.toThrow('not persisted');
+  expect(await AsyncStorage.getItem('bookmarks')).toBe(legacy);
+  warn.mockRestore();
+
+  const repos = await openRepositories();
+  expect((await repos.bookmarks.list()).map((b) => b.story.id)).toEqual([5]);
+  expect(await AsyncStorage.getItem('bookmarks')).toBeNull();
+  expect(await AsyncStorage.getItem(WEB_STORE_KEY)).toContain('Old');
+});
+
 it('generates distinct sortable ids', () => {
   expect(
     newId(

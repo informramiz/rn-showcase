@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Linking, Platform } from 'react-native';
+import { useEffect } from 'react';
+import { AppState, Linking, Platform } from 'react-native';
 import { getAlertPermission, requestAlertPermission } from '@/shared/notifications/notifications';
 
 const PERMISSION_KEY = ['device', 'alert-permission'] as const;
@@ -13,6 +14,14 @@ export function useCommentAlerts() {
     networkMode: 'always',
     enabled: Platform.OS !== 'web',
   });
+  // The user may change the permission in system settings; re-read it when the app returns to the foreground.
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') void client.invalidateQueries({ queryKey: PERMISSION_KEY });
+    });
+    return () => sub.remove();
+  }, [client]);
   const request = useMutation({
     mutationFn: requestAlertPermission,
     onSuccess: (result) => client.setQueryData(PERMISSION_KEY, result),

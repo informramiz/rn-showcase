@@ -41,6 +41,16 @@ describe('CommentThread', () => {
     expect(screen.getByText('2 replies, tap to expand')).toBeTruthy();
   });
 
+  it('keeps replies of a deleted comment visible', async () => {
+    const tree: Record<number, object> = {
+      1: { id: 1, deleted: true, kids: [2] },
+      2: { id: 2, by: 'bob', text: 'survivor' },
+    };
+    mockFetch.mockImplementation((url) => ok(tree[itemIdFromUrl(url)]));
+    await renderWithClient(<CommentThread rootIds={[1]} />);
+    expect(await screen.findByText('survivor')).toBeTruthy();
+  });
+
   it('retries a comment that failed to load', async () => {
     mockFetch.mockReturnValue(httpError(500));
     await renderWithClient(<CommentThread rootIds={[2]} />);

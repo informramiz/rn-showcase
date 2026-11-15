@@ -210,6 +210,34 @@ describe('createSyncEngine', () => {
     expect(await repos.outbox.list()).toEqual([]);
   });
 
+  it('deletes on the server a note that was deleted while its first push was in flight', async () => {
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let entered: () => void = () => undefined;
+    const pushStarted = new Promise<void>((resolve) => {
+      entered = resolve;
+    });
+    const slow: SyncService = {
+      push: async (change) => {
+        entered();
+        await gate;
+        return remote.push(change);
+      },
+    };
+    const engine = engineWith(slow);
+    const note = await repos.notes.save(draft('doomed'), t);
+    const run = engine.syncNow();
+    await pushStarted;
+    await repos.notes.remove(note.id, (t += 10));
+    release();
+    await run;
+
+    expect(remote.store.has(note.id)).toBe(false);
+    expect(await repos.outbox.list()).toEqual([]);
+  });
+
   it('notifies subscribers after each run and stops after dispose', async () => {
     const engine = engineWith();
     const listener = jest.fn();

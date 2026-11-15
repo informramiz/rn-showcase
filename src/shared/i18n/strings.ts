@@ -64,6 +64,7 @@ export const strings = {
     cancel: 'Cancel',
     edit: 'Edit',
     delete: 'Delete',
+    failed: 'Could not save locally. Your text is kept; try again.',
     sync: { synced: 'Synced', pending: 'Waiting to sync', failed: 'Sync failed' },
   },
   alerts: {

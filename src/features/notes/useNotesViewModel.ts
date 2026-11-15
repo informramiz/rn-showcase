@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { NoteWithSync } from '@/shared/sync/types';
 import { useDeleteNote, useNotes, useSaveNote } from './useNotes';
 
@@ -19,25 +19,48 @@ export function useNotesViewModel(storyId: number) {
   const saveNote = useSaveNote();
   const deleteNote = useDeleteNote();
   const [editor, setEditor] = useState<Editor>(EMPTY);
+  const [busy, setBusy] = useState(false);
+  const inFlight = useRef(false);
+  const [failed, setFailed] = useState(false);
 
-  const save = async () => {
-    if (!editor.body.trim()) return;
-    await saveNote({
-      id: editor.id,
-      storyId,
-      body: editor.body,
-      highlight: editor.highlight,
-      tags: parseTags(editor.tags),
-    });
-    setEditor(EMPTY);
+  /** Run one write at a time; on failure keep the draft and flag the error. */
+  const guarded = async (write: () => Promise<void>) => {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setBusy(true);
+    setFailed(false);
+    try {
+      await write();
+    } catch (e) {
+      console.warn('Note write failed', e);
+      setFailed(true);
+    } finally {
+      inFlight.current = false;
+      setBusy(false);
+    }
   };
+
+  const save = () =>
+    guarded(async () => {
+      if (!editor.body.trim()) return;
+      await saveNote({
+        id: editor.id,
+        storyId,
+        body: editor.body,
+        highlight: editor.highlight,
+        tags: parseTags(editor.tags),
+      });
+      setEditor(EMPTY);
+    });
 
   return {
     state: {
       notes,
       editor,
       editing: editor.id !== undefined,
-      canSave: editor.body.trim().length > 0,
+      canSave: editor.body.trim().length > 0 && !busy,
+      busy,
+      failed,
     },
     actions: {
       setBody: (body: string) => setEditor((e) => ({ ...e, body })),
@@ -52,10 +75,11 @@ export function useNotesViewModel(storyId: number) {
           tags: note.tags.join(', '),
         }),
       cancelEdit: () => setEditor(EMPTY),
-      remove: async (id: string) => {
-        await deleteNote(id);
-        setEditor((e) => (e.id === id ? EMPTY : e));
-      },
+      remove: (id: string) =>
+        guarded(async () => {
+          await deleteNote(id);
+          setEditor((e) => (e.id === id ? EMPTY : e));
+        }),
     },
   };
 }

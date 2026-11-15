@@ -26,6 +26,8 @@ export function useSearchViewModel() {
     enabled: hasQuery,
     placeholderData: keepPreviousData,
     ...localQueryOptions,
+    // The searchable cache changes under us (downloads, pruning), so refetch when the screen mounts.
+    staleTime: 0,
   });
 
   return {

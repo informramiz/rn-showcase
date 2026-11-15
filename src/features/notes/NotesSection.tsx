@@ -99,6 +99,11 @@ export function NotesSection({ storyId }: { storyId: number }) {
         autoCapitalize="none"
         style={input}
       />
+      {state.failed ? (
+        <Text testID="note-error" style={{ color: colors.danger }}>
+          {strings.notes.failed}
+        </Text>
+      ) : null}
       <View style={{ flexDirection: 'row', gap: spacing.sm }}>
         <Button
           testID="note-save"

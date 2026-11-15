@@ -1,7 +1,7 @@
 import type { HNItem } from '@/shared/api';
 import type { HnSource } from '@/shared/data/hnSource';
 import { createMemoryRepositories } from '@/shared/data/memory/repositories';
-import { refreshInBackground } from '../refresh';
+import { refreshInBackground, type CommentUpdate } from '../refresh';
 
 const story = (id: number, descendants: number): HNItem => ({
   id,
@@ -56,6 +56,26 @@ describe('refreshInBackground', () => {
 
     // A second run with no changes notifies nothing.
     await expect(refreshInBackground({ repos, hn }, notify)).resolves.toEqual([]);
+  });
+
+  it('keeps delivering and retries a failed alert on the next run', async () => {
+    const repos = createMemoryRepositories();
+    await repos.bookmarks.toggle({ id: 10, title: 'a', descendants: 0 }, 1);
+    await repos.bookmarks.toggle({ id: 11, title: 'b', descendants: 0 }, 1);
+    const hn = fakeHn({ 10: story(10, 2), 11: story(11, 4) });
+    const notify = jest
+      .fn<Promise<void>, [CommentUpdate]>()
+      .mockImplementation((u) =>
+        u.story.id === 10 ? Promise.reject(new Error('blocked')) : Promise.resolve(),
+      );
+
+    const first = await refreshInBackground({ repos, hn }, notify);
+    expect(first.map((u) => u.story.id)).toEqual([11]);
+    expect(notify).toHaveBeenCalledTimes(2);
+
+    notify.mockResolvedValue();
+    const second = await refreshInBackground({ repos, hn }, notify);
+    expect(second.map((u) => [u.story.id, u.newComments])).toEqual([[10, 2]]);
   });
 
   it('keeps going when the prefetch or one story fails', async () => {
