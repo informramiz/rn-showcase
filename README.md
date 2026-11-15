@@ -92,7 +92,7 @@ The notes server is faked (`shared/sync/fakeRemote.ts`, optimistic concurrency w
 1. **Outbox.** Saving or deleting a note writes the note and an outbox row in one step. Repeated edits coalesce into one entry; creating and deleting a note before it ever synced cancels out.
 2. **SyncEngine** (`shared/sync/syncEngine.ts`) pushes due entries with the version they were based on. It runs at startup, after every note change, and on demand. Concurrent calls share one run.
 3. **Retry with backoff.** Retryable failures are rescheduled with exponential backoff and full jitter (2 s base, 5 min cap), and a timer wakes the engine for the next attempt. After 6 attempts, or on a non-retryable error, the entry is parked as failed until the user taps Retry.
-4. **Conflicts.** If the server version moved on, `resolveConflict` decides: edit vs edit merges field by field (newer text wins, tags are unioned) and re-pushes only if the merge differs from the server; a local delete loses to a remote edit; a local edit re-creates a note deleted remotely.
+4. **Conflicts.** If the server version moved on, `resolveConflict` decides: edit vs edit merges at note level (the newer copy’s text wins, tags are unioned) and re-pushes only if the merge differs from the server; a local delete loses to a remote edit; a local edit re-creates a note deleted remotely.
 5. **Edits during a push** are not lost: the engine compares the entry's revision before and after the request and pushes the newer edit next.
 
 All the rules live in `outbox.ts` as pure functions with time and randomness passed in, so they are unit-tested without timers or I/O. The engine is tested against the in-memory repositories and the fake remote.
@@ -179,12 +179,12 @@ The app is configured for EAS (`eas.json`, bundle id `com.codebyramiz.hnreader`)
 
 - **SQLite on native, an in-memory store on web.** expo-sqlite on web runs on wa-sqlite and needs OPFS with COOP/COEP headers, which GitHub Pages cannot send, and the default build has no FTS5. The repositories sit behind ports, so the web build uses a memory implementation with the same contract tests.
 - **One query cache for remote and local data.** Local reads are TanStack queries with `staleTime: Infinity` that writes invalidate. The alternative, Drizzle's `useLiveQuery`, would not work for the memory store and would give screens two ways to read.
-- **Last writer wins per field, tags merged.** Notes are short and personal, so a full three-way merge or CRDT is not worth it. Deleting someone's newer edit is the worst outcome, so edits beat deletes both ways.
+- **Last writer wins per note, tags merged.** The text fields (body, highlight) come from whichever copy was edited last; tags are the union. Notes are short and personal, so a full three-way merge or CRDT is not worth it. Deleting someone's newer edit is the worst outcome, so edits beat deletes both ways.
 - **Full jitter backoff** ([AWS Architecture Blog](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/)) so many clients coming back online do not retry in lockstep.
 - **Swipe actions fire on open, not on a panel tap.** It is one gesture instead of two, and the row closes again so the list does not keep open rows around.
 - **AsyncStorage, not MMKV, for the little that is left in key-value storage** (the theme setting, and the web store). It works in Expo Go with no setup.
 - **Feed tabs are chips, not bottom tabs.** Five feeds plus Saved, History and Settings is too many bottom tabs. The feeds are a chip row on the Stories screen, and the bottom bar has four tabs.
-- **Comments load lazily and are collapsed by default.** Some threads have hundreds of comments. Only top-level comments load at first, replies load on expand. The tree is flattened into a row list by a pure function (`flattenThread`), which is why it is easy to test.
+- **Comments load lazily and are collapsed by default.** Some threads have hundreds of comments. Only top-level comments load at first, replies load on expand. Each comment is a recursive `CommentNode` that reads its own cache entry, and deleted or dead comments are skipped while their replies stay visible.
 - **Comment text is converted to plain text.** HN comments use a small HTML subset. Links become bare URLs. Rendering real HTML would add a dependency for little gain here.
 - **Refresh keeps only page one.** Pull to refresh drops the cached ID list and the extra pages, so it does not re-download everything you scrolled through.
 - **Clear cache also clears history.** Bookmarks and notes are kept, and cached items of saved stories are not pruned.

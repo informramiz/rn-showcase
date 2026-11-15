@@ -15,8 +15,17 @@ interface NodeProps {
 function CommentNode({ id, depth, expanded, onToggle }: NodeProps) {
   const { data: item, isPending, refetch } = useItem(id);
   const retry = useCallback(() => void refetch(), [refetch]);
-  if (item?.deleted || item?.dead) return null;
   const kids = item?.kids ?? [];
+  if (item?.deleted || item?.dead) {
+    // Hide the removed comment but keep its surviving replies reachable.
+    return (
+      <>
+        {kids.map((kid) => (
+          <CommentNode key={kid} id={kid} depth={depth} expanded={expanded} onToggle={onToggle} />
+        ))}
+      </>
+    );
+  }
   const isExpanded = expanded.has(id);
   return (
     <>

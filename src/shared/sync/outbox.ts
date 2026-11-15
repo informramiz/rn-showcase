@@ -109,7 +109,7 @@ export function normalizeTags(tags: readonly string[]): string[] {
 }
 
 /**
- * Field-level merge of two copies of a note: the text fields come from the
+ * Note-level merge of two copies of a note: the text fields come from the
  * copy edited last (the server wins a tie), tags are the union of both.
  */
 export function mergeNotes(local: Note, remote: Note): Note {
@@ -145,7 +145,7 @@ export type ConflictResolution =
  * Decide what to do when the server rejects a change because its copy moved on.
  * - Local delete vs remote edit: the edit wins (deleting someone's newer work is worse).
  * - Local edit vs remote delete: the edit wins and is re-created.
- * - Edit vs edit: field-level merge; re-push only if the merge differs from the server.
+ * - Edit vs edit: note-level merge (newer copy’s text, tags unioned); re-push only if the merge differs from the server.
  */
 export function resolveConflict(
   entry: OutboxEntry,

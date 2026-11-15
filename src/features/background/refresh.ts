@@ -28,14 +28,16 @@ export async function refreshInBackground(
       const item = await hn.item(bookmark.story.id);
       const count = item.descendants ?? 0;
       if (count === bookmark.knownDescendants) continue;
-      await repos.bookmarks.setKnownDescendants(item.id, count);
       if (count > bookmark.knownDescendants) {
-        updates.push({ story: toSummary(item), newComments: count - bookmark.knownDescendants });
+        const update = { story: toSummary(item), newComments: count - bookmark.knownDescendants };
+        // Record the new count only after the alert went out, so a failed delivery is retried next run.
+        await notify(update);
+        updates.push(update);
       }
+      await repos.bookmarks.setKnownDescendants(item.id, count);
     } catch (e) {
       console.warn(`Refreshing saved story ${String(bookmark.story.id)} failed`, e);
     }
   }
-  for (const update of updates) await notify(update);
   return updates;
 }

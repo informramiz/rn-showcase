@@ -80,6 +80,20 @@ export function createSyncEngine({
     switch (result.kind) {
       case 'ok':
         if (entry.op === 'upsert') await notes.setVersion(entry.entityId, result.version);
+        if (entry.op === 'upsert' && current === undefined && !(await notes.get(entry.entityId))) {
+          // Deleted while its first push was in flight: the server now has the note, so delete it there too.
+          await outbox.put({
+            entityId: entry.entityId,
+            op: 'delete',
+            baseVersion: result.version,
+            revision: 1,
+            attempts: 0,
+            nextAttemptAt: now(),
+            status: 'pending',
+            createdAt: now(),
+          });
+          return true;
+        }
         if (changedMeanwhile) await outbox.put({ ...current, baseVersion: result.version });
         else await outbox.remove(entry.entityId);
         return changedMeanwhile;

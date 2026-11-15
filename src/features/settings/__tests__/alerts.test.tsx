@@ -1,5 +1,5 @@
-import { fireEvent, screen } from '@testing-library/react-native';
-import { Linking } from 'react-native';
+import { act, fireEvent, screen } from '@testing-library/react-native';
+import { AppState, Linking } from 'react-native';
 import { SettingsScreen } from '@/features/settings/SettingsScreen';
 import { getAlertPermission, requestAlertPermission } from '@/shared/notifications/notifications';
 import { newTestClient, newTestServices, renderWithClient } from '../../../__tests__/helpers';
@@ -22,6 +22,20 @@ describe('Settings comment alerts', () => {
     expect(request).toHaveBeenCalled();
     expect(await screen.findByText('On')).toBeTruthy();
     expect(screen.queryByTestId('alerts-enable')).toBeNull();
+  });
+
+  it('re-reads the permission when the app returns to the foreground', async () => {
+    get.mockResolvedValue('denied');
+    let onChange: (state: string) => void = () => undefined;
+    jest.spyOn(AppState, 'addEventListener').mockImplementation((_type, listener) => {
+      onChange = listener as (state: string) => void;
+      return { remove: jest.fn() };
+    });
+    await render();
+    expect(await screen.findByTestId('alerts-settings')).toBeTruthy();
+    get.mockResolvedValue('granted');
+    await act(() => onChange('active'));
+    expect(await screen.findByText('On')).toBeTruthy();
   });
 
   it('sends a denied user to the system settings', async () => {

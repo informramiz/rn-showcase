@@ -12,6 +12,29 @@ function first<T>(list: readonly T[]): T {
   return item;
 }
 
+describe('useNotesViewModel failures', () => {
+  it('keeps the draft, flags the error and ignores a second save while one is running', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const services = newTestServices();
+    const save = jest.spyOn(services.repos.notes, 'save').mockRejectedValueOnce(new Error('disk full'));
+    const { result } = await renderHook(() => useNotesViewModel(STORY), {
+      wrapper: clientWrapper(newTestClient(), services),
+    });
+    await act(() => result.current.actions.setBody('keep me'));
+    await act(async () => {
+      await Promise.all([result.current.actions.save(), result.current.actions.save()]);
+    });
+    expect(save).toHaveBeenCalledTimes(1);
+    expect(result.current.state.failed).toBe(true);
+    expect(result.current.state.editor.body).toBe('keep me');
+
+    await act(() => result.current.actions.save());
+    expect(result.current.state.failed).toBe(false);
+    expect(result.current.state.editor.body).toBe('');
+    warn.mockRestore();
+  });
+});
+
 describe('useNotesViewModel', () => {
   it('saves a note, syncs it and edits it in place', async () => {
     const services = newTestServices();
