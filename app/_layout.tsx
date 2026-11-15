@@ -23,8 +23,8 @@ export default function RootLayout() {
   const boot = useBootServices(createAppServices);
   const { colors, scheme } = useTheme();
   useOnlineManagerSync();
-  useNotificationNavigation();
   const ready = boot.status === 'ready';
+  useNotificationNavigation(ready);
   useEffect(() => {
     if (!ready) return;
     registerBackgroundRefresh().catch((e: unknown) => {

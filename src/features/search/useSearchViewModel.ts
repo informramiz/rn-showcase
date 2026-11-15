@@ -1,5 +1,6 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { useDeferredValue, useState } from 'react';
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useDeferredValue, useState } from 'react';
 import { useOpenStory } from '@/features/history/useOpenStory';
 import { useReadIds } from '@/features/history/useReadIds';
 import type { SearchScope } from '@/shared/data/ports';
@@ -15,10 +16,18 @@ const SCOPES: readonly SearchScope[] = ['all', 'saved'];
  */
 export function useSearchViewModel() {
   const { repos } = useServices();
+  const client = useQueryClient();
   const [query, setQuery] = useState('');
   const [scope, setScope] = useState<SearchScope>('all');
   const deferred = useDeferredValue(query.trim());
   const hasQuery = tokenize(deferred).length > 0;
+
+  // The searchable cache changes while this tab is away (downloads, pruning), so re-run on focus.
+  useFocusEffect(
+    useCallback(() => {
+      void client.invalidateQueries({ queryKey: dbKeys.search });
+    }, [client]),
+  );
 
   const { data, isFetching } = useQuery({
     queryKey: dbKeys.searchFor(deferred, scope),
@@ -26,8 +35,6 @@ export function useSearchViewModel() {
     enabled: hasQuery,
     placeholderData: keepPreviousData,
     ...localQueryOptions,
-    // The searchable cache changes under us (downloads, pruning), so refetch when the screen mounts.
-    staleTime: 0,
   });
 
   return {

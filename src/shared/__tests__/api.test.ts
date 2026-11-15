@@ -47,6 +47,15 @@ describe('api layer', () => {
     await expect(fetchItem(1)).rejects.toMatchObject({ kind: 'parse' });
   });
 
+  it('does not report a failed body read as a parse error', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.reject(new TypeError('connection lost')),
+    });
+    await expect(fetchItem(1)).rejects.toMatchObject({ kind: 'network' });
+  });
+
   it('times out slow requests', async () => {
     jest.useFakeTimers();
     mockFetch.mockImplementation(

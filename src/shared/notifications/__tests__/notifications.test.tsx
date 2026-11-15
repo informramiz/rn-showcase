@@ -85,13 +85,19 @@ describe('notifications', () => {
     n.useLastNotificationResponse.mockReturnValue({
       notification: { request: { content: { data: { storyId: 5 } } } },
     } as unknown as Notifications.NotificationResponse);
-    await renderHook(() => useNotificationNavigation());
+    const { rerender } = await renderHook((enabled: boolean) => useNotificationNavigation(enabled), {
+      initialProps: false,
+    });
+    // Not ready yet (still booting): nothing happens and the response is kept.
+    expect(routerMock.push).not.toHaveBeenCalled();
+    expect(n.clearLastNotificationResponse).not.toHaveBeenCalled();
+    await rerender(true);
     expect(routerMock.push).toHaveBeenCalledWith({ pathname: '/story/[id]', params: { id: '5' } });
     expect(n.clearLastNotificationResponse).toHaveBeenCalled();
 
     routerMock.push.mockReset();
     n.useLastNotificationResponse.mockReturnValue(null);
-    await renderHook(() => useNotificationNavigation());
+    await renderHook(() => useNotificationNavigation(true));
     expect(routerMock.push).not.toHaveBeenCalled();
   });
 });

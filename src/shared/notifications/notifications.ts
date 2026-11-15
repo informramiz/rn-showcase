@@ -63,13 +63,15 @@ export async function notifyNewComments(update: {
 }
 
 /** Open the story a tapped notification points at (also when the tap launched the app). */
-export function useNotificationNavigation(): void {
+export function useNotificationNavigation(enabled: boolean): void {
   const response = Notifications.useLastNotificationResponse();
   const router = useRouter();
   useEffect(() => {
+    // A cold-start tap must wait until the navigator is mounted.
+    if (!enabled) return;
     const storyId: unknown = response?.notification.request.content.data?.storyId;
     if (typeof storyId !== 'number') return;
     router.push({ pathname: '/story/[id]', params: { id: String(storyId) } });
     Notifications.clearLastNotificationResponse();
-  }, [response, router]);
+  }, [enabled, response, router]);
 }

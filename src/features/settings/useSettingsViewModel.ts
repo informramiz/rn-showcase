@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Alert, Platform } from 'react-native';
 import { useClearBookmarks } from '@/features/bookmarks/useBookmarks';
 import { useClearHistory } from '@/features/history/useHistory';
+import { dbKeys } from '@/shared/data/queryKeys';
 import { strings } from '@/shared/i18n/strings';
 import { useServices } from '@/shared/services/AppServices';
 import { useSettings, type ThemeMode } from './store';
@@ -34,6 +35,7 @@ export function useSettingsViewModel() {
     // Prune everything not pinned by a bookmark or note, then drop in-memory server state.
     await repos.cache.prune(Number.MAX_SAFE_INTEGER);
     client.removeQueries({ predicate: (q) => q.queryKey[0] !== 'db' });
+    await client.invalidateQueries({ queryKey: dbKeys.search });
     Alert.alert(strings.settings.cacheCleared, strings.settings.cacheClearedBody);
   };
 

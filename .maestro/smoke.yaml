@@ -59,6 +59,10 @@ appId: com.codebyramiz.hnreader
 - assertVisible:
     id: bookmarks-list
 - assertNotVisible: No bookmarks yet
+# Story 0 was saved from its detail screen and story 1 by the swipe, so the list has two rows.
+# Row ids are positional: story-item-1 only exists when the swipe saved something.
+- assertVisible:
+    id: story-item-1
 # Deep link straight into a story (item 1 is the first HN story, it never goes away).
 - openLink: hnreader://story/1
 - extendedWaitUntil:
