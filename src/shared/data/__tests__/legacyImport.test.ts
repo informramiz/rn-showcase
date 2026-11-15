@@ -41,6 +41,11 @@ it('treats missing, malformed and odd-shaped data as empty', async () => {
   await AsyncStorage.setItem(LEGACY_BOOKMARKS_KEY, 'not json');
   await AsyncStorage.setItem(LEGACY_HISTORY_KEY, JSON.stringify({ state: null }));
   expect(await importLegacyStores(AsyncStorage, repos, 1)).toEqual({ bookmarks: 0, history: 0 });
+  await AsyncStorage.setItem(
+    LEGACY_HISTORY_KEY,
+    JSON.stringify({ state: { entries: [null, 7, 'x', { story: null }] } }),
+  );
+  expect(await importLegacyStores(AsyncStorage, repos, 1)).toEqual({ bookmarks: 0, history: 0 });
   await AsyncStorage.setItem(LEGACY_BOOKMARKS_KEY, JSON.stringify({ state: { items: 'x' } }));
   await AsyncStorage.setItem(LEGACY_HISTORY_KEY, JSON.stringify({ state: { entries: 'x' } }));
   expect(await importLegacyStores(AsyncStorage, repos, 1)).toEqual({ bookmarks: 0, history: 0 });

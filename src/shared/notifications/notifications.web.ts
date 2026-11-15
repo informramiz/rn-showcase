@@ -19,6 +19,6 @@ export function notifyNewComments(): Promise<void> {
   return Promise.resolve();
 }
 
-export function useNotificationNavigation(): void {
+export function useNotificationNavigation(_enabled: boolean): void {
   // No-op on web.
 }

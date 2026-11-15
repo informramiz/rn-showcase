@@ -31,8 +31,10 @@ export async function getJson(path: string, options: GetJsonOptions = {}): Promi
     }
     try {
       return (await res.json()) as unknown;
-    } catch {
-      throw new ApiError('parse', `Invalid JSON for ${path}`);
+    } catch (e) {
+      // Only malformed JSON is a parse error; aborts and dropped connections keep their own kind.
+      if (e instanceof SyntaxError) throw new ApiError('parse', `Invalid JSON for ${path}`);
+      throw e;
     }
   } catch (e) {
     if (e instanceof ApiError) throw e;

@@ -74,6 +74,28 @@ describe('useStoriesViewModel', () => {
     expect(result.current.state.stories).toHaveLength(first);
   });
 
+  it('paginates over the id list it started with, even if the feed reshuffles', async () => {
+    const client = newTestClient();
+    const { result } = await renderHook(() => useStoriesViewModel(), { wrapper: clientWrapper(client) });
+    await waitFor(() => {
+      expect(result.current.state.stories).toHaveLength(20);
+    });
+    // The id cache expires and the server now returns a different order.
+    client.removeQueries({ queryKey: ['ids', 'top'] });
+    mockFetch.mockImplementation((url) => {
+      if (url.includes('topstories')) return ok([...ids].reverse());
+      const id = itemIdFromUrl(url);
+      return ok({ id, title: `Story ${id}`, type: 'story' });
+    });
+    await act(() => {
+      result.current.actions.loadMore();
+    });
+    await waitFor(() => {
+      expect(result.current.state.stories).toHaveLength(40);
+    });
+    expect(result.current.state.stories.map((st) => st.id)).toEqual(ids);
+  });
+
   it('reports an error when nothing is cached, and retries', async () => {
     mockFetch.mockRejectedValue(new TypeError('down'));
     const { result } = await setup();

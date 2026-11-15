@@ -56,7 +56,10 @@ export async function importLegacyStores(
   const reads = Array.isArray(entries)
     ? entries.filter(
         (e): e is { story: StorySummary; readAt: number } =>
-          isStory((e as { story?: unknown }).story) && typeof (e as { readAt?: unknown }).readAt === 'number',
+          typeof e === 'object' &&
+          e !== null &&
+          isStory((e as { story?: unknown }).story) &&
+          typeof (e as { readAt?: unknown }).readAt === 'number',
       )
     : [];
   for (const entry of [...reads].reverse()) await repos.history.markRead(entry.story, entry.readAt);

@@ -15,6 +15,16 @@ jest.mock('expo-router', () => {
     useRouter: () => ({ push: routerMock.push }),
     useLocalSearchParams: () => routerMock.params,
     Stack: { Screen: () => null },
+    useFocusEffect: (effect: () => void) => {
+      const { useEffect } = jest.requireActual<typeof import('react')>('react');
+      useEffect(() => {
+        effect();
+        routerMock.focusEffects.add(effect);
+        return () => {
+          routerMock.focusEffects.delete(effect);
+        };
+      }, [effect]);
+    },
   };
 });
 jest.mock('expo-web-browser', () => ({ openBrowserAsync: jest.fn() }));
