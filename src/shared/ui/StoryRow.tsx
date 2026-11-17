@@ -33,15 +33,17 @@ function StoryRowBase({ story, index, read, onPress }: Props) {
         borderBottomWidth: 1,
         borderColor: colors.border,
         backgroundColor: colors.surface,
-        opacity: read ? 0.55 : 1,
       }}
     >
-      <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600', lineHeight: 22 }}>
-        {story.title}
-      </Text>
-      {host ? <Text style={{ color: colors.accent, fontSize: 12, marginTop: 2 }}>{host}</Text> : null}
-      <View style={{ marginTop: 6 }}>
-        <Text style={{ color: colors.textMuted, fontSize: 12 }}>{meta}</Text>
+      {/* Dim only the content: dimming the row itself lets the swipe panels behind it show through. */}
+      <View style={{ opacity: read ? 0.55 : 1 }}>
+        <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600', lineHeight: 22 }}>
+          {story.title}
+        </Text>
+        {host ? <Text style={{ color: colors.accent, fontSize: 12, marginTop: 2 }}>{host}</Text> : null}
+        <View style={{ marginTop: 6 }}>
+          <Text style={{ color: colors.textMuted, fontSize: 12 }}>{meta}</Text>
+        </View>
       </View>
     </Pressable>
   );

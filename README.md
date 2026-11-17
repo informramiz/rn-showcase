@@ -6,6 +6,10 @@ A Hacker News client built with React Native (Expo, SDK 58) and TypeScript. It r
 
 Built by Ramiz Raja as a small but complete example of production-style React Native: typed API layer, server-state caching, persisted local state, tests, CI and release config.
 
+![HN Reader: save a story, add a note with tags, a failed sync retried from Settings, offline search](docs/demo/hn-reader-demo.gif)
+
+Full 43-second demo (feed, story, save, note with tags, flaky network, Sync now, Retry failed, search), recorded from the web build of the app at 390px, not a native build: [docs/demo/hn-reader-demo.mp4](docs/demo/hn-reader-demo.mp4).
+
 ## Features
 
 - Top, New, Best, Ask and Show feeds with infinite scroll (the ID list is paginated, items are fetched in batches).
